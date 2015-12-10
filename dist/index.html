@@ -1,0 +1,102 @@
+<!doctype html>
+<html ng-app="livenowWidget">
+<head>
+   <title>Live Now Widget</title>
+   <meta charset="UTF-8">
+   <meta name="apple-mobile-web-app-title" content="Kambi">
+   <meta name="description" content="Live Now Widget">
+   <meta name="HandheldFriendly" content="True">
+   <meta name="MobileOptimized" content="320">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+   <!--<link rel="apple-touch-icon-precomposed" sizes="180x180" href="images/touch/Icon-60@3x.png">-->
+   <!--<link rel="apple-touch-icon-precomposed" sizes="152x152" href="images/touch/Icon-76@2x.png">-->
+   <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/touch/Icon-72@2x.png">-->
+   <!--<link rel="apple-touch-icon-precomposed" sizes="120x120" href="images/touch/Icon-60@2x.png">-->
+   <!--<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/touch/Icon@2x.png">-->
+   <!--<link rel="apple-touch-icon-precomposed" sizes="76x76" href="images/touch/Icon-76.png">-->
+   <!--<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/touch/Icon-72.png">-->
+   <!--<link rel="apple-touch-icon-precomposed" href="images/touch/Icon.png">-->
+   <!--<link rel="shortcut icon" href="images/touch/apple-touch-icon.png">-->
+   <!--<link rel="icon" sizes="192x192" href="images/touch/Icon-192.png">-->
+   <!--<link rel="icon" sizes="128x128" href="images/touch/Icon-128.png">-->
+
+   <meta name="fragment" content="!"/>
+
+   <meta name="mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+   <meta name="apple-mobile-web-app-title" content="">
+
+   <link rel="stylesheet" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+   <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"/>
+   <link rel="stylesheet" href="css/app.min.css">
+   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-animate.js"></script>
+   <script src="https://c3-static.kambi.com/sb-mobileclient/widget-api/1.0.0.7/kambi-widget-api.js"></script>
+   <script src="js/app.min.js"></script>
+</head>
+<body class="kw-body">
+<div class="kw-card l-flexbox l-vertical l-expander" ng-controller="appController">
+   <!--Header-->
+   <header class="kw-header l-pl-15">Live now ({{liveEvents.length}})</header>
+
+   <!--Main-->
+   <main class="l-flexbox l-vertical l-flexed l-pack-start">
+      <div class="kw-event l-flexbox l-vertical l-pb-15 l-pt-15 l-pl-15 l-pr-15 anim-fade-in"
+           ng-repeat="liveEvent in liveEvents | startFrom: startFrom | limitTo : args.listLimit">
+
+         <!--Competitors and path-->
+         <div class="kw-event-name-container l-flexbox l-vertical l-pack-center l-flex-3">
+            <!--Competitors-->
+            <div class="kw-event-name l-flexbox" ng-click="navigateToLiveEvent(liveEvent.event.id)">
+               <div class="l-flexbox">
+                  <span class="text-truncate">{{liveEvent.event.homeName}}</span>
+               </div>
+               <div class="kw-event-name-divider l-pl-5 l-pr-5">-</div>
+               <div class="l-flexbox">
+                  <span class="text-truncate">{{liveEvent.event.awayName}}</span>
+               </div>
+            </div>
+            <!--Event path-->
+            <div class="kw-event-path l-flexbox">
+               <div class="l-flexbox" ng-repeat="p in liveEvent.event.path"
+                    style="max-width: {{ 100 / liveEvent.event.path.length }}%">
+                  <span class="kw-event-path-name l-flexbox l-flex-3">
+                     <span class="text-truncate">{{p.name}}</span>
+                  </span>
+                  <span ng-if="!$last" class="kw-event-path-divider l-pl-5 l-pr-5">{{!$last?'/':''}}</span>
+               </div>
+            </div>
+         </div>
+
+         <!--Outcomes-->
+         <div class="kw-event-outcomes l-flexbox l-mt-10">
+            <div class="kw-event-outcome l-flex-1 l-flexbox l-horizontal"
+                 ng-if="liveEvent.mainBetOffer.outcomes.length <= 3"
+                 ng-repeat="outcome in liveEvent.mainBetOffer.outcomes"
+                 ng-click="toggleOutcome(outcome)"
+                 ng-class="{selected: outcome.selected===true}">
+               <span class="kw-event-outcome-label text-truncate l-flex-2 l-pr-5">{{getOutcomeLabel(outcome, liveEvent.event)}}</span>
+               <span class="kw-event-outcome-odds l-flex-1 l-flexbox l-align-end l-pack-end"><strong>{{outcome.odds/1000}}</strong></span>
+            </div>
+            <div class="l-flexbox l-expander l-flex-1 l-pack-center l-align-center"
+                 ng-if="liveEvent.mainBetOffer.outcomes.length > 3">
+               {{liveEvent.mainBetOffer.outcomes.length }} outcomes
+            </div>
+            <div class="l-flexbox l-flex-1 l-pack-center" ng-if="!liveEvent.mainBetOffer">
+            </div>
+         </div>
+      </div>
+   </main>
+   <!--Footer-->
+   <footer class="kw-footer">
+      <kambi-pagination-directive class="kw-pagination l-flexbox l-pack-center l-align-center"
+                                  list="liveEvents"
+                                  pages="pages"
+                                  start-from="startFrom"
+                                  list-limit="args.listLimit"></kambi-pagination-directive>
+   </footer>
+</div>
+</body>
+</html>
