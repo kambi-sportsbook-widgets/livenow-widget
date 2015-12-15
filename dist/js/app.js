@@ -272,9 +272,8 @@
          var removeWidgetArgsListener = $scope.$on('WIDGET:ARGS', function ( event, data ) {
             // Set the arguments for the app and then set the flag to indicate that this is done
             $scope.setArgs(data);
-
             // Set the offering in the API service
-            if ( data.hasOwnProperty('offering') ) {
+            if (data != null && data.hasOwnProperty('offering') ) {
                $apiService.setOffering(data.offering);
             } else {
                console.warn('No offering has been set, API requests will not work');
@@ -875,7 +874,8 @@
 
          /**
           * @ngdoc overview
-          * @name widgetCore.KambiAPIService#getGroupById
+          * @name widgetCore.kambiAPIService#getGroupById
+          * @methodOf widgetCore.kambiAPIService
           * @description
           * Fetches the specified group based on the id and it's contained groups, limited by depth
           * @param {number} groupId The id of the group to fetch
@@ -888,9 +888,6 @@
                depth: depth
             });
          };
-
-
-
 
          /**
           * @ngdoc overview
