@@ -1,0 +1,69 @@
+.kw-event {
+   height: 145px;
+   min-height: 145px;
+}
+
+.kw-event-time {
+   color: $color-4-2-card-supportive-text;
+   font-size: 12px;
+   line-height: 1.4;
+
+   span {
+      white-space: nowrap;
+   }
+}
+
+.kw-event-name {
+   > div {
+      max-width: 100%;
+   }
+}
+
+.kw-event-path {
+   width: 100%;
+
+   .kw-path {
+      @include flex(0 1 auto);
+   }
+}
+
+.kw-event-team-home,
+.kw-event-team-away {
+   font-size: 14px;
+   line-height: 1.6;
+
+   span {
+      &:last-child {
+         font-weight: 600;
+         min-width: 20px;
+      }
+   }
+}
+
+.kw-event-team-stats {
+   color: $color-4-2-card-text;
+   display: flex;
+   font-size: 12px;
+   line-height: 1.4;
+   margin-right: 3px;
+   min-height: 9px;
+   min-width: 6px;
+   padding: 0 1px;
+   justify-content: center;
+
+   &.yellowCards {
+      background-color: #EFDC00;
+   }
+
+   &.redCards {
+      background-color: $color-red-card;
+   }
+
+   &.corners {
+      display: none;
+   }
+}
+
+.kw-sets {
+   color: $color-red-dark;
+}

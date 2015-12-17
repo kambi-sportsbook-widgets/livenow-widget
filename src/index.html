@@ -8,19 +8,6 @@
    <meta name="HandheldFriendly" content="True">
    <meta name="MobileOptimized" content="320">
    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-
-   <!--<link rel="apple-touch-icon-precomposed" sizes="180x180" href="images/touch/Icon-60@3x.png">-->
-   <!--<link rel="apple-touch-icon-precomposed" sizes="152x152" href="images/touch/Icon-76@2x.png">-->
-   <!--<link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/touch/Icon-72@2x.png">-->
-   <!--<link rel="apple-touch-icon-precomposed" sizes="120x120" href="images/touch/Icon-60@2x.png">-->
-   <!--<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/touch/Icon@2x.png">-->
-   <!--<link rel="apple-touch-icon-precomposed" sizes="76x76" href="images/touch/Icon-76.png">-->
-   <!--<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/touch/Icon-72.png">-->
-   <!--<link rel="apple-touch-icon-precomposed" href="images/touch/Icon.png">-->
-   <!--<link rel="shortcut icon" href="images/touch/apple-touch-icon.png">-->
-   <!--<link rel="icon" sizes="192x192" href="images/touch/Icon-192.png">-->
-   <!--<link rel="icon" sizes="128x128" href="images/touch/Icon-128.png">-->
-
    <meta name="fragment" content="!"/>
 
    <meta name="mobile-web-app-capable" content="yes">
@@ -40,13 +27,15 @@
    <!-- build:js -->
    <!-- This section will be replaced in the gulp build process -->
    <script src="js/app.js"></script>
-   <!--<script src="js/filters/startFrom.js"></script>-->
    <script src="js/controllers/appController.js"></script>
+   <script src="js/service/timerService.js"></script>
+   <script src="js/directives/timerDirective.js"></script>
    <script src="../node_modules/kambi-sportsbook-widget-library/src/js/controllers/widgetCoreController.js"></script>
    <script src="../node_modules/kambi-sportsbook-widget-library/src/js/filters/startFrom.js"></script>
    <script src="../node_modules/kambi-sportsbook-widget-library/src/js/services/kambiWidgetService.js"></script>
    <script src="../node_modules/kambi-sportsbook-widget-library/src/js/services/kambiAPIService.js"></script>
    <script src="../node_modules/kambi-sportsbook-widget-library/src/js/directives/kambiPaginationDirective.js"></script>
+
    <!-- endbuild -->
 </head>
 <body class="kw-body">
@@ -61,30 +50,76 @@
 
          <!--Competitors and path-->
          <div class="kw-event-name-container l-flexbox l-vertical l-pack-center l-flex-3">
+
             <!--Competitors-->
-            <div class="kw-event-name l-flexbox" ng-click="navigateToLiveEvent(liveEvent.event.id)">
-               <div class="l-flexbox">
-                  <span class="text-truncate">{{liveEvent.event.homeName}}</span>
+            <div class="kw-event-name l-flexbox l-vertical" ng-click="navigateToLiveEvent(liveEvent.event.id)">
+
+               <div class="kw-event-team-home l-flexbox l-horizontal">
+                  <span class="l-flexbox l-flexed l-pr-10">{{liveEvent.event.homeName}}</span>
+
+                  <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center">
+
+                     <div
+                        class="kw-event-team-stats {{key}}"
+                        ng-if="liveEvent.liveData.statistics.football && value > 0"
+                        ng-repeat="(key, value) in liveEvent.liveData.statistics.football.home">
+                     </div>
+
+                     <div
+                        class="kw-event-team-sets l-mr-5"
+                        ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.home.length && scoreset >= 0"
+                        ng-repeat="scoreset in liveEvent.liveData.statistics.sets.home track by $index">
+                        <span>{{scoreset}}</span>
+                     </div>
+                  </div>
+
+                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }" class="l-flexbox l-pack-end">{{liveEvent.liveData.score.home}}</span>
                </div>
-               <div class="kw-event-name-divider l-pl-5 l-pr-5">-</div>
-               <div class="l-flexbox">
-                  <span class="text-truncate">{{liveEvent.event.awayName}}</span>
+
+               <div class="kw-event-team-away l-flexbox l-horizontal">
+                  <span class="l-flexbox l-flexed l-pr-10">{{liveEvent.event.awayName}}</span>
+
+                  <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center">
+
+                     <div
+                        class="kw-event-team-stats {{key}}"
+                        ng-if="liveEvent.liveData.statistics.football && value > 0"
+                        ng-repeat="(key, value) in liveEvent.liveData.statistics.football.away">
+                     </div>
+
+                     <div
+                        class="kw-event-team-sets l-mr-5"
+                        ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.away.length && scoreset >= 0"
+                        ng-repeat="scoreset in liveEvent.liveData.statistics.sets.away track by $index">
+                        <span>{{scoreset}}</span>
+                     </div>
+                  </div>
+
+                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }" class="l-flexbox l-pack-end">{{liveEvent.liveData.score.away}}</span>
                </div>
             </div>
-            <!--Event path-->
-            <div class="kw-event-path l-flexbox">
-               <div class="l-flexbox" ng-repeat="p in liveEvent.event.path"
-                    style="max-width: {{ 100 / liveEvent.event.path.length }}%">
+
+            <div class="l-flexbox">
+               <!--Event path-->
+               <div class="kw-event-path l-flexbox l-horizontal l-flexed l-pt-5">
+                  <div class="l-flexbox" ng-repeat="p in liveEvent.event.path"
+                       style="max-width: {{ 100 / liveEvent.event.path.length }}%">
                   <span class="kw-event-path-name l-flexbox l-flex-3">
                      <span class="text-truncate">{{p.name}}</span>
                   </span>
-                  <span ng-if="!$last" class="kw-event-path-divider l-pl-5 l-pr-5">{{!$last?'/':''}}</span>
+                     <span ng-if="!$last" class="kw-event-path-divider l-pl-5 l-pr-5">{{!$last?'/':''}}</span>
+                  </div>
+               </div>
+
+               <!--Event time-->
+               <div class="kw-event-time l-pt-5">
+                  <timer-directive class="l-flexbox l-pack-center" index="$index" timer="liveEvent.liveData.matchClock"></timer-directive>
                </div>
             </div>
          </div>
 
          <!--Outcomes-->
-         <div class="kw-event-outcomes l-flexbox l-mt-10">
+         <div class="kw-event-outcomes l-flexbox">
             <div class="kw-event-outcome l-flex-1 l-flexbox l-horizontal"
                  ng-if="liveEvent.mainBetOffer.outcomes.length <= 3"
                  ng-repeat="outcome in liveEvent.mainBetOffer.outcomes"

@@ -455,6 +455,10 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
   padding-left: 30px;
 }
 
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
@@ -739,6 +743,70 @@ Copyright (c) 2015 Daniel Eden
   -webkit-transition-duration: 0s;
 }
 
+.kw-event {
+  height: 145px;
+  min-height: 145px;
+}
 
+.kw-event-time {
+  color: #999;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.kw-event-time span {
+  white-space: nowrap;
+}
+
+.kw-event-name > div {
+  max-width: 100%;
+}
+
+.kw-event-path {
+  width: 100%;
+}
+.kw-event-path .kw-path {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+  -moz-box-flex: 0;
+  -moz-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+}
+
+.kw-event-team-home,
+.kw-event-team-away {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.kw-event-team-home span:last-child,
+.kw-event-team-away span:last-child {
+  font-weight: 600;
+  min-width: 20px;
+}
+
+.kw-event-team-stats {
+  color: #333;
+  display: flex;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-right: 3px;
+  min-height: 9px;
+  min-width: 6px;
+  padding: 0 1px;
+  justify-content: center;
+}
+.kw-event-team-stats.yellowCards {
+  background-color: #EFDC00;
+}
+.kw-event-team-stats.redCards {
+  background-color: #FE0000;
+}
+.kw-event-team-stats.corners {
+  display: none;
+}
+
+.kw-sets {
+  color: #a4000b;
+}
 
 /*# sourceMappingURL=app.css.map */
