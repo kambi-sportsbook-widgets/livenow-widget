@@ -4,6 +4,7 @@
 
    arrDependencies = [
       'widgetCore',
+      'widgetCore.translate',
       'ngAnimate'
    ];
 
@@ -12,5 +13,3 @@
       return $app;
    })(angular.module('livenowWidget', arrDependencies));
 }).call(this);
-
-
