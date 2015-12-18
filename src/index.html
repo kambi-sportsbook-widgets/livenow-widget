@@ -50,7 +50,7 @@
            ng-repeat="liveEvent in liveEvents | startFrom: startFrom | limitTo : args.listLimit">
 
          <!--Competitors and path-->
-         <div class="kw-event-name-container l-flexbox l-vertical l-pack-center l-flex-3">
+         <div class="kw-event-name-container l-flexbox l-vertical l-pack-start l-flex-3">
 
             <!--Competitors-->
             <div class="kw-event-header l-flexbox l-horizontal" ng-click="navigateToLiveEvent(liveEvent.event.id)">
@@ -77,10 +77,10 @@
                         ng-repeat="(key, value) in liveEvent.liveData.statistics.football.home">
                      </div>
 
-                     <div class="kw-event-team-sets l-flexed l-mr-10"
+                     <div class="kw-event-team-sets l-flexed l-pack-center l-mr-10"
                         ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.home.length && scoreset >= 0"
                         ng-repeat="scoreset in liveEvent.liveData.statistics.sets.home track by $index">
-                        <strong class="l-pack-center">{{scoreset}}</strong>
+                        <strong class="l-pack-center l-flexbox">{{scoreset}}</strong>
                      </div>
                   </div>
                   <!--Away set score-->
@@ -90,10 +90,10 @@
                         ng-repeat="(key, value) in liveEvent.liveData.statistics.football.away">
                      </div>
 
-                     <div class="kw-event-team-sets l-flexed l-mr-10"
+                     <div class="kw-event-team-sets l-flexed l-pack-center l-mr-10"
                         ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.away.length && scoreset >= 0"
                         ng-repeat="scoreset in liveEvent.liveData.statistics.sets.away track by $index">
-                        <strong class="l-pack-center">{{scoreset}}</strong>
+                        <strong class="l-pack-center l-flexbox">{{scoreset}}</strong>
                      </div>
                   </div>
                </div>
