@@ -64,12 +64,18 @@
 }
 
 .kw-serve {
+   animation: fadeInOut 3s;
+   -moz-animation: fadeInOut 3s;
+   -ms-animation: fadeInOut 3s;
+   -webkit-animation: fadeInOut 3s;
    background-color: $color-yellow-card;
+   @include border-radius(6px);
    height: 6px;
    left: -10px;
    margin-top: -3px;
    position: absolute;
-   @include border-radius(6px);
    top: 50%;
    width: 6px;
 }
+
+

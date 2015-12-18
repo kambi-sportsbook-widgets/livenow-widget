@@ -58,12 +58,12 @@
                <!--Team name-->
                <div class="l-flexbox l-vertical l-flexed">
                   <div class="l-flexbox">
-                     <span ng-class="{'kw-serve': liveEvent.liveData.statistics.sets.homeServe}"></span>
+                     <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.sets.homeServe}"></span>
                      <span class="l-flexbox">{{liveEvent.event.homeName}}</span>
                   </div>
 
                   <div class="l-flexbox">
-                     <span ng-class="{'kw-serve': liveEvent.liveData.statistics.sets.homeServe === false}"></span>
+                     <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.sets.homeServe === false}"></span>
                      <span class="l-flexbox">{{liveEvent.event.awayName}}</span>
                   </div>
                </div>
@@ -77,7 +77,7 @@
                         ng-repeat="(key, value) in liveEvent.liveData.statistics.football.home">
                      </div>
 
-                     <div class="kw-event-team-sets l-flexed l-mr-5"
+                     <div class="kw-event-team-sets l-flexed l-mr-10"
                         ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.home.length && scoreset >= 0"
                         ng-repeat="scoreset in liveEvent.liveData.statistics.sets.home track by $index">
                         <strong class="l-pack-center">{{scoreset}}</strong>
@@ -90,7 +90,7 @@
                         ng-repeat="(key, value) in liveEvent.liveData.statistics.football.away">
                      </div>
 
-                     <div class="kw-event-team-sets l-flexed l-mr-5"
+                     <div class="kw-event-team-sets l-flexed l-mr-10"
                         ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.away.length && scoreset >= 0"
                         ng-repeat="scoreset in liveEvent.liveData.statistics.sets.away track by $index">
                         <strong class="l-pack-center">{{scoreset}}</strong>
