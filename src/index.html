@@ -52,51 +52,59 @@
          <div class="kw-event-name-container l-flexbox l-vertical l-pack-center l-flex-3">
 
             <!--Competitors-->
-            <div class="kw-event-name l-flexbox l-vertical" ng-click="navigateToLiveEvent(liveEvent.event.id)">
+            <div class="kw-event-header l-flexbox l-horizontal" ng-click="navigateToLiveEvent(liveEvent.event.id)">
 
-               <div class="kw-event-team-home l-flexbox l-horizontal">
-                  <span class="l-flexbox l-flexed l-pr-10">{{liveEvent.event.homeName}}</span>
+               <!--Team name-->
+               <div class="l-flexbox l-vertical l-flexed">
+                  <div class="l-flexbox">
+                     <span ng-class="{'kw-serve': liveEvent.liveData.statistics.sets.homeServe}"></span>
+                     <span class="l-flexbox">{{liveEvent.event.homeName}}</span>
+                  </div>
 
-                  <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center">
+                  <div class="l-flexbox">
+                     <span ng-class="{'kw-serve': liveEvent.liveData.statistics.sets.homeServe === false}"></span>
+                     <span class="l-flexbox">{{liveEvent.event.awayName}}</span>
+                  </div>
+               </div>
 
-                     <div
-                        class="kw-event-team-stats {{key}}"
+               <!--Scores-->
+               <div class="kw-event-score l-flexbox l-vertical">
+                  <!--Home set score-->
+                  <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-5">
+                     <div class="kw-event-team-stats {{key}}"
                         ng-if="liveEvent.liveData.statistics.football && value > 0"
                         ng-repeat="(key, value) in liveEvent.liveData.statistics.football.home">
                      </div>
 
-                     <div
-                        class="kw-event-team-sets l-mr-5"
+                     <div class="kw-event-team-sets l-flexed l-mr-5"
                         ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.home.length && scoreset >= 0"
                         ng-repeat="scoreset in liveEvent.liveData.statistics.sets.home track by $index">
-                        <span>{{scoreset}}</span>
+                        <strong class="l-pack-center">{{scoreset}}</strong>
                      </div>
                   </div>
-
-                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }" class="l-flexbox l-pack-end">{{liveEvent.liveData.score.home}}</span>
-               </div>
-
-               <div class="kw-event-team-away l-flexbox l-horizontal">
-                  <span class="l-flexbox l-flexed l-pr-10">{{liveEvent.event.awayName}}</span>
-
-                  <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center">
-
-                     <div
-                        class="kw-event-team-stats {{key}}"
+                  <!--Away set score-->
+                  <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-5">
+                     <div class="kw-event-team-stats {{key}}"
                         ng-if="liveEvent.liveData.statistics.football && value > 0"
                         ng-repeat="(key, value) in liveEvent.liveData.statistics.football.away">
                      </div>
 
-                     <div
-                        class="kw-event-team-sets l-mr-5"
+                     <div class="kw-event-team-sets l-flexed l-mr-5"
                         ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.away.length && scoreset >= 0"
                         ng-repeat="scoreset in liveEvent.liveData.statistics.sets.away track by $index">
-                        <span>{{scoreset}}</span>
+                        <strong class="l-pack-center">{{scoreset}}</strong>
                      </div>
                   </div>
-
-                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }" class="l-flexbox l-pack-end">{{liveEvent.liveData.score.away}}</span>
                </div>
+
+               <!--Score-->
+               <div class="kw-event-score l-flexbox l-vertical">
+                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }"
+                        class="l-flexbox l-pack-end"><strong>{{liveEvent.liveData.score.home}}</strong></span>
+                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }"
+                        class="l-flexbox l-pack-end"><strong>{{liveEvent.liveData.score.away}}</strong></span>
+               </div>
+
             </div>
 
             <div class="l-flexbox">

@@ -757,10 +757,6 @@ Copyright (c) 2015 Daniel Eden
   white-space: nowrap;
 }
 
-.kw-event-name > div {
-  max-width: 100%;
-}
-
 .kw-event-path {
   width: 100%;
 }
@@ -778,25 +774,22 @@ Copyright (c) 2015 Daniel Eden
   font-size: 14px;
   line-height: 1.6;
 }
-.kw-event-team-home span:last-child,
-.kw-event-team-away span:last-child {
-  font-weight: 600;
-  min-width: 20px;
+
+.kw-event-header {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.kw-event-header div {
+  position: relative;
 }
 
 .kw-event-team-stats {
-  color: #333;
-  display: flex;
-  font-size: 12px;
-  line-height: 1.4;
   margin-right: 3px;
   min-height: 9px;
   min-width: 6px;
-  padding: 0 1px;
-  justify-content: center;
 }
 .kw-event-team-stats.yellowCards {
-  background-color: #EFDC00;
+  background-color: #F7CE00;
 }
 .kw-event-team-stats.redCards {
   background-color: #FE0000;
@@ -807,6 +800,19 @@ Copyright (c) 2015 Daniel Eden
 
 .kw-sets {
   color: #a4000b;
+}
+
+.kw-serve {
+  background-color: #F7CE00;
+  height: 6px;
+  left: -10px;
+  margin-top: -3px;
+  position: absolute;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  top: 50%;
+  width: 6px;
 }
 
 /*# sourceMappingURL=app.css.map */
