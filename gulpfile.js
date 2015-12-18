@@ -1,6 +1,6 @@
 (function () {
    var gulp, awspublish, rename, concat, uglify, notify, jshint, stripDebug, del, sourcemaps, minifycss, htmlReplace, gulpDoxx, sass, buildTemp, replace,
-      install, npmLibs;
+      install, npmLibs, jsonminify;
 
    gulp = require('gulp');
 
@@ -36,10 +36,13 @@
 
    install = require('gulp-install');
 
+   jsonminify = require('gulp-jsonminify');
+
    buildTemp = '.buildTemp';
 
    npmLibs = [
-      './node_modules/kambi-sportsbook-widget-library/dist/js/app.js'
+      './node_modules/kambi-sportsbook-widget-library/dist/js/app.js',
+      './node_modules/kambi-sportsbook-widget-core-translate/dist/translate.js'
    ];
 
    gulp.task('default', ['build', 'clean-build'], function () {
@@ -145,7 +148,7 @@
       return gulp.start('build');
    });
 
-   gulp.task('build', ['js-concat', 'css'], function () {
+   gulp.task('build', ['js-concat', 'css', 'translations'], function () {
       return gulp.src('./src/index.html')
          .pipe(htmlReplace({
             css: 'css/app.min.css',
@@ -170,6 +173,12 @@
          .pipe(uglify())
          .pipe(rename('app.min.js'))
          .pipe(gulp.dest('./dist/js'));
+   });
+
+   gulp.task('translations', function(){
+      return gulp.src('./src/i18n/*.json')
+         .pipe(jsonminify())
+         .pipe(gulp.dest('./dist/i18n/'))
    });
 
 
