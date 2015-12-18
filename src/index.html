@@ -46,7 +46,8 @@
 
    <!--Main-->
    <main class="l-flexbox l-vertical l-flexed l-pack-start">
-      <div class="kw-event l-flexbox l-vertical l-pb-15 l-pt-15 l-pl-15 l-pr-15 anim-fade-in"
+      <div class="kw-event l-flexbox l-vertical l-pb-15 l-pt-15 l-pl-15 l-pr-15"
+           ng-class="{'anim-fade-in': enableAnimation}"
            ng-repeat="liveEvent in liveEvents | startFrom: startFrom | limitTo : args.listLimit">
 
          <!--Competitors and path-->

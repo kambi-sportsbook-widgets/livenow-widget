@@ -803,14 +803,18 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .kw-serve {
+  animation: fadeInOut 3s;
+  -moz-animation: fadeInOut 3s;
+  -ms-animation: fadeInOut 3s;
+  -webkit-animation: fadeInOut 3s;
   background-color: #F7CE00;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
   height: 6px;
   left: -10px;
   margin-top: -3px;
   position: absolute;
-  -moz-border-radius: 6px;
-  -webkit-border-radius: 6px;
-  border-radius: 6px;
   top: 50%;
   width: 6px;
 }

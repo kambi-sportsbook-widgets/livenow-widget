@@ -25,7 +25,7 @@
                'timer': '='
             },
             template: '<span ng-if="minute || second" ng-cloak>{{minute}} : {{second}}</span>',
-            controller: ['$scope', '$rootScope', function ( $scope, $rootScope ) {
+            controller: ['$scope', '$rootScope', 'timerService', function ( $scope, $rootScope, timerService ) {
 
                /**
                 * Prepends a zero for numbers below 10
@@ -55,24 +55,33 @@
                };
 
                /**
-                * Sets the default value for minute and second based on api data
+                * Get the current event minute and second based on event data and internal timer
+                * @param count
                 */
-               if ( $scope.timer.running === false ) {
-                  $scope.minute = readableTime($scope.timer.minute);
-                  $scope.second = readableTime($scope.timer.second);
-               }
-
-               /**
-                * Listener for timer update event, which sets the scope minute and second
-                */
-               $rootScope.$on('TIMER:UPDATE', function ( e, count ) {
-
+               var getRealTime = function(count) {
                   var eventSeconds = $scope.timer.minute * 60 + $scope.timer.second + count;
 
                   if ( $scope.timer.running ) {
                      $scope.second = parseSeconds(eventSeconds).seconds;
                      $scope.minute = parseSeconds(eventSeconds).minutes;
                   }
+               };
+
+               /**
+                * Sets the default value for minute and second based on api data
+                */
+               if ( $scope.timer.running === false ) {
+                  $scope.minute = readableTime($scope.timer.minute);
+                  $scope.second = readableTime($scope.timer.second);
+               } else {
+                  getRealTime(timerService.seconds);
+               }
+
+               /**
+                * Listener for timer update event, which sets the scope minute and second
+                */
+               $rootScope.$on('TIMER:UPDATE', function ( e, count ) {
+                  getRealTime(count);
                });
             }]
          };

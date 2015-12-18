@@ -2,7 +2,7 @@
 
    'use strict';
 
-   function appController( $scope, $widgetService, $apiService, $controller, timerService ) {
+   function appController( $scope, $widgetService, $apiService, $controller, timerService, $timeout ) {
 
       // Extend the core controller that takes care of basic setup and common functions
       angular.extend(appController, $controller('widgetCoreController', {
@@ -32,6 +32,9 @@
 
       // The actual list of the widget
       //$scope.currentHeight = 515;
+
+      //By default enable animation
+      $scope.enableAnimation = true;
 
       // Check that the list limit is not set to 0
       if ( $scope.initialListLimit === 0 ) {
@@ -63,10 +66,13 @@
             $widgetService.requestBetslipOutcomes();
 
             // Start the global timer
-
             timerService.stop();
             timerService.start();
 
+            // Enable back the animation after 300ms delay
+            $timeout(function() {
+               $scope.enableAnimation = true;
+            }, 300);
 
          }, function ( response ) {
             console.warn('%c Failed to load live event data', 'color:red;');
@@ -113,7 +119,6 @@
       //------- Listeners ----------
       //----------------------------
 
-
       // Betslip outcomes listener
       $scope.$on('OUTCOMES:UPDATE', function ( event, data ) {
          $scope.updateOutcomes(data.outcomes);
@@ -125,8 +130,10 @@
       });
 
       // Listen to timer and refresh events every 30 sec
+      // We disable the animation until after the events are loaded
       $scope.$on('TIMER:UPDATE', function ( e, count ) {
          if ( count % 30 === 0 ) {
+            $scope.enableAnimation = false;
             $scope.getLiveEvents();
          }
       });
@@ -134,7 +141,7 @@
    }
 
    (function ( $app ) {
-      return $app.controller('appController', ['$scope', 'kambiWidgetService', 'kambiAPIService', '$controller', 'timerService', appController]);
+      return $app.controller('appController', ['$scope', 'kambiWidgetService', 'kambiAPIService', '$controller', 'timerService', '$timeout', appController]);
    })(angular.module('livenowWidget'));
 
 }).call(this);
