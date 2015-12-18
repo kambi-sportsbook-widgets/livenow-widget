@@ -2,7 +2,7 @@
 
    'use strict';
 
-   function appController( $scope, $widgetService, $apiService, $controller ) {
+   function appController( $scope, $widgetService, $apiService, $controller, timerService ) {
 
       // Extend the core controller that takes care of basic setup and common functions
       angular.extend(appController, $controller('widgetCoreController', {
@@ -28,10 +28,10 @@
       $scope.startFrom = 0;
 
       // Default Widget height, used when resetting the list
-      $scope.defaultHeight = 417;
+      $scope.defaultHeight = 515;
 
       // The actual list of the widget
-      $scope.currentHeight = 417;
+      //$scope.currentHeight = 515;
 
       // Check that the list limit is not set to 0
       if ( $scope.initialListLimit === 0 ) {
@@ -53,12 +53,21 @@
                $scope.args.listLimit = $scope.liveEvents.length;
             }
 
+            $widgetService.setWidgetHeight($scope.args.listLimit * 145 + 37 * 2);
+
             // Setup the pages
             $scope.setPages($scope.liveEvents, $scope.args.listLimit); // call the directive function here
 
             // If there are outcomes in the betslip we need update our event outcomes with this.
             // Request the betslip outcomes.
             $widgetService.requestBetslipOutcomes();
+
+            // Start the global timer
+
+            timerService.stop();
+            timerService.start();
+
+
          }, function ( response ) {
             console.warn('%c Failed to load live event data', 'color:red;');
             console.warn(response);
@@ -95,7 +104,7 @@
       // Call the init method in the coreWidgetController so that we setup everything using our overridden values
       // The init-method returns a promise that resolves when all of the configurations are set, for instance the $scope.args variables
       // so we can call our methods that require parameters from the widget settings after the init method is called
-      $scope.init().then(function(){
+      $scope.init().then(function () {
          // Fetch the live events
          $scope.getLiveEvents();
       });
@@ -115,12 +124,17 @@
          $scope.setOddsFormat(data);
       });
 
-
+      // Listen to timer and refresh events every 30 sec
+      $scope.$on('TIMER:UPDATE', function ( e, count ) {
+         if ( count % 30 === 0 ) {
+            $scope.getLiveEvents();
+         }
+      });
 
    }
 
    (function ( $app ) {
-      return $app.controller('appController', ['$scope', 'kambiWidgetService', 'kambiAPIService', '$controller', appController]);
+      return $app.controller('appController', ['$scope', 'kambiWidgetService', 'kambiAPIService', '$controller', 'timerService', appController]);
    })(angular.module('livenowWidget'));
 
 }).call(this);
