@@ -18,6 +18,8 @@ __`client-widgets.js`__
 },
 ...
 
+```
+
 ### The widget accepts the following parameter/s:
 1. `listLimit` - integer - defaults to 3 - list size per page
 
