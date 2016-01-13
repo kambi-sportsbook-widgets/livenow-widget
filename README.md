@@ -21,6 +21,12 @@ __`client-widgets.js`__
 ### The widget accepts the following parameter/s:
 1. `listLimit` - integer - defaults to 3 - list size per page
 
-## For setting up sass maps, follow this tutorial https://www.hackmonkey.com/2014/sep/configuring-css-source-maps-compass
+# Other tools
 
-## To use Scss Lint, run "gem install scss_lint"
+For setting up sass maps, follow this tutorial https://www.hackmonkey.com/2014/sep/configuring-css-source-maps-compass
+
+To use Scss Lint, run "gem install scss_lint"
+
+# Changelog
+
+changelog can be found [here](CHANGELOG.md)
