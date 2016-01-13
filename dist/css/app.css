@@ -788,9 +788,6 @@ Copyright (c) 2015 Daniel Eden
   min-height: 9px;
   min-width: 6px;
 }
-.kw-event-team-stats.yellowCards {
-  background-color: #F7CE00;
-}
 .kw-event-team-stats.redCards {
   background-color: #FE0000;
 }
