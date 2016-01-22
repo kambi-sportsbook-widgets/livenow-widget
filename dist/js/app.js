@@ -305,11 +305,15 @@
     * @name widgetCore.controller:widgetCoreController
     * @requires ng.$scope
     * @requires widgetCore.kambiWidgetService
+    * @requires widgetCore.kambiAPIService
+    * @requires widgetCore.coreUtilsService
+    * @requires ng.$q
+    * @requires ng.$controller
     * @description
     * This controller takes care of the common widget implementations and should be extended by the widgets own controller(s)
     * @author <michael@globalmouth.com>
     */
-   function widgetCoreController( $scope, $widgetService, $apiService, $q, $controller ) {
+   function widgetCoreController( $scope, $widgetService, $apiService, $coreUtilsService, $q, $controller ) {
 
 
       /**
@@ -338,7 +342,6 @@
        * @description The odds format,
        * @returns {String} Default 'decimal'
        */
-         //todo: Use the odds format setting
       $scope.oddsFormat = 'decimal';
 
       /**
@@ -618,6 +621,102 @@
 
       /**
        * @ngdoc method
+       * @name widgetCore.controller:widgetCoreController#getFormattedOdds
+       * @methodOf widgetCore.controller:widgetCoreController
+       * @description
+       * Takes an outcome object and returns the odds format based on the current oddsFormat setting
+       * @param {Object} outcome An outcome object
+       * @returns {number|String} The odds value for the current format
+       */
+      $scope.getFormattedOdds = function ( outcome ) {
+         switch ( $scope.oddsFormat ) {
+            case 'fractional':
+               return outcome.oddsFractional;
+            case 'american':
+               if(outcome.oddsAmerican > 0){
+                  return '+'+outcome.oddsAmerican;
+               } else {
+                  return outcome.oddsAmerican;
+               }
+               break;
+            default:
+               return outcome.odds / 1000;
+
+         }
+      };
+
+
+      /**
+       * @ngdoc method
+       * @name widgetCore.controller:widgetCoreController#multiplyOdds
+       * @methodOf widgetCore.controller:widgetCoreController
+       * @description
+       * Takes an array of outcomes and multiplies them according to the current oddsFormat setting
+       * @param {Array.<Object>} outcomes An array of outcome objects
+       * @returns {number|String} The combined odds based on the current oddsFormat setting
+       */
+      $scope.multiplyOdds = function ( outcomes ) {
+
+         var i = 0, result = 1, len = outcomes.length;
+         for ( ; i < len; ++i ) {
+            result = result * outcomes[i].odds / 1000;
+         }
+         switch ( $scope.oddsFormat ) {
+            case 'american':
+               result = Math.round(result * 100) / 100;
+               if ( result < 2 ) {
+                  result = Math.round(-100 / (result - 1 ));
+               } else {
+                  result = (result - 1) * 100;
+                  // American odds need to show either + or - in front of value
+                  result = '+' + Math.round(result);
+               }
+               break;
+            case 'fractional':
+               /*
+                This is all guesswork and needs to be fixed
+                */
+               if ( result <= 3 ) {
+                  // Odds less than 10 are limited to one decimal
+                  //console.debug('Less than 3: ' + result + ' -> ' + $coreUtilsService.roundDown(result, 100));
+                  //result = Number(result).toFixed(1);
+                  result = $coreUtilsService.roundDown(result, 100);
+
+               } else if ( result <= 10 ) {
+                  // Odds less than 10 are limited to one decimal
+                  //console.debug('Less than 10: ' + result + ' -> ' + $coreUtilsService.roundDown(result, 10));
+                  //result = Number(result).toFixed(1);
+                  result = $coreUtilsService.roundDown(result, 10);
+
+               } else if ( result <= 14 ) {
+                  //Odd greater than 10 and lower 15 are rounded down to nearest 0.5, Note: 0.76 rounds down to 0.5 not 1
+                  //console.debug('Less than 10: ' + result + ' -> ' + $coreUtilsService.roundHalf(result));
+                  result = $coreUtilsService.roundHalf(result);
+
+               } else {
+                  //Odds greater than 14 are rounded down to nearest integer
+                  //console.debug('Greater than 14: ' + result + ' -> ' + Math.floor(result));
+                  result = Math.floor(result);
+               }
+               result = $coreUtilsService.convertToFraction(Number(result - 1).toFixed(2));
+               console.debug('Calculated fractional: ' + result.n + '/' + result.d);
+               result = result.n + '/' + result.d;
+               // Todo: Implement fractional odds
+               /*
+                For now we'll return nothing
+                */
+               result = '';
+               break;
+            default:
+               // Decimals are just rounded off to two decimal points
+               result = Math.round(result * 100) / 100;
+               break;
+         }
+         return result;
+      };
+
+      /**
+       * @ngdoc method
        * @name widgetCore.controller:widgetCoreController#findEvent
        * @methodOf widgetCore.controller:widgetCoreController
        * @description
@@ -739,10 +838,17 @@
          $scope.currentHeight = height;
       });
 
+      // Add a listener for the odds format change, set the format and call $apply() to force an update in the view
+      $scope.$on('ODDS:FORMAT', function ( event, format ) {
+         $scope.setOddsFormat(format);
+         $scope.$apply();
+      });
+
    }
 
    (function ( $app ) {
-      return $app.controller('widgetCoreController', ['$scope', 'kambiWidgetService', 'kambiAPIService', '$q', '$controller', widgetCoreController]);
+      return $app.controller('widgetCoreController', ['$scope', 'kambiWidgetService', 'kambiAPIService', 'coreUtilsService', '$q', '$controller',
+         widgetCoreController]);
    })(angular.module('widgetCore', []));
 
 })();
@@ -890,6 +996,11 @@
                      paginationItems.push(i);
                   }
 
+                  //Return to first page if activePage is beyond the pagecount. Useful when pagecount changes due to filtering.
+                  if ( pageCount !== 0 && activePage > pageCount) {
+                     $scope.setActivePage(1);
+                  }
+
                   return paginationItems;
                };
             }]
@@ -937,6 +1048,97 @@
 
       /**
        * @ngdoc service
+       * @name widgetCore.coreUtilsService
+       * @description
+       * Service that provides some utility methods
+       */
+      return $app.service('coreUtilsService', [function () {
+         var coreUtilsService = {};
+
+         /**
+          * @ngdoc overview
+          * @name widgetCore.coreUtilsService#roundHalf
+          * @methodOf widgetCore.coreUtilsService
+          * @description
+          * Rounds down a number to it's nearest multiple of 0.5
+          * @param {number} num The number to round down
+          * @returns {number}
+          */
+         coreUtilsService.roundHalf = function ( num ) {
+            return Math.floor(num * 2) / 2;
+         };
+
+         /**
+          * @ngdoc overview
+          * @name widgetCore.coreUtilsService#roundDown
+          * @methodOf widgetCore.coreUtilsService
+          * @description
+          * Rounds down a number based on the specified divider
+          * @param {number} num The number to round down
+          * @param {number} divider The divider to use, 2 will round down to nearest 0.5 value. 4 down to nearest 0.25 etc.
+          * @returns {number}
+          */
+         coreUtilsService.roundDown = function(num, divider) {
+            return Math.floor(num * divider) / divider;
+         };
+
+         /**
+          * @ngdoc overview
+          * @name widgetCore.coreUtilsService#convertToFraction
+          * @methodOf widgetCore.coreUtilsService
+          * @description
+          * Converts a number to an object describing a fraction
+          * @param {number} fraction The number to convert
+          * @returns {{n: number, d: number}} An object containing the numerator and denumerator
+          */
+         coreUtilsService.convertToFraction = function ( fraction ) {
+            var len = fraction.toString().length - 2;
+
+            var denominator = Math.pow(10, len);
+            var numerator = fraction * denominator;
+
+            var divisor = coreUtilsService.gcd(numerator, denominator);
+
+            numerator /= divisor;
+            denominator /= divisor;
+
+            return {
+               n: numerator,
+               d: denominator
+            };
+         };
+
+         /**
+          * @ngdoc overview
+          * @name widgetCore.coreUtilsService#gcd
+          * @methodOf widgetCore.coreUtilsService
+          * @description
+          * Finds the greatest common denominator based on a numerator and denominator
+          * @param {number} a The numerator
+          * @param {number} b The denominator
+          * @returns {number}
+          */
+         coreUtilsService.gcd = function ( a, b ) {
+            if ( b < 0.0000001 ) {
+               return a;
+            }
+
+            return coreUtilsService.gcd(b, Math.floor(a % b));
+         };
+
+         return coreUtilsService;
+      }]);
+   })(angular.module('widgetCore'));
+})();
+
+(function () {
+
+   'use strict';
+
+   (function ( $app ) {
+
+      /**
+       * @ngdoc service
        * @name widgetCore.kambiAPIService
        * @requires ng.$http
        * @requires ng.$q
@@ -956,13 +1158,14 @@
 
          kambiAPIService.config = {
             apiBaseUrl: null,
+            apiUrl: null,
             channelId: null,
             currency: null,
             locale: null,
             market: null,
             offering: null,
             clientId: null,
-            version: 'v2'
+            version: null
          };
 
          /**
@@ -986,8 +1189,6 @@
                   }
                }
             }
-            // We need to replace the {apiVersion} part of the apiBaseUrl with the configured version
-            kambiAPIService.config.apiBaseUrl = kambiAPIService.config.apiBaseUrl.replace(/\{apiVersion}/gi, kambiAPIService.config.version);
             kambiAPIService.configSet = true;
             if ( kambiAPIService.configSet && kambiAPIService.offeringSet ) {
                kambiAPIService.configDefer.resolve();
@@ -1024,6 +1225,119 @@
          kambiAPIService.getGroupEvents = function ( groupId ) {
             var requesPath = '/event/group/' + groupId + '.json';
             return kambiAPIService.doRequest(requesPath);
+         };
+
+         /**
+          * @ngdoc overview
+          * @name widgetCore.kambiAPIService#getEventsByFilterParameters
+          * @methodOf widgetCore.kambiAPIService
+          * @description
+          * Fetches the events based on the provided filter parameters
+          * @param {Array.<String>|String} sports An array of strings or a string (comma separated) containing the sports to filter
+          * @param {Array.<String>|Array.<Array.<String>>|String} regions An array of arrays, strings or a single string (comma separated)
+          * containing the regions to filter
+          * @param {Array.<String>|Array.<Array.<String>>|String} leagues An array of arrays, strings or a single string (comma separated)
+          * containing the leagues to filter
+          * @param {Object|Array.<String>} participants Participants, undocumented
+          * @param {Array.<String>|String} attributes An array of strings or a single string (comma separated) containing the attributes to filter
+          * @param {Object} params An object containing the parameters to pass in the request
+          * @returns {Promise} Returns a promise
+          */
+         kambiAPIService.getEventsByFilterParameters = function ( sports, regions, leagues, participants, attributes, params ) {
+            // Todo: Update this method once documentation is available
+            var requestPath = '/listView/';
+
+            // Sports
+            if ( sports != null ) {
+               requestPath += kambiAPIService.parseFilterParameter(sports);
+            } else {
+               requestPath += 'all/';
+            }
+
+            //Regions
+            if ( regions != null ) {
+               requestPath += kambiAPIService.parseFilterParameter(regions);
+            } else {
+               requestPath += 'all/';
+            }
+
+            //Leagues
+            if ( leagues != null ) {
+               requestPath += kambiAPIService.parseFilterParameter(leagues);
+            } else {
+               requestPath += 'all/';
+            }
+
+            //Participants
+            // Todo: implement participants once there is documentation for it
+            requestPath = requestPath + 'all/';
+
+            if ( attributes != null ) {
+               requestPath += kambiAPIService.parseFilterParameter(sports);
+            } else {
+               requestPath += 'all/';
+            }
+
+            return kambiAPIService.doRequest(requestPath, params, 'v3');
+         };
+
+         /**
+          * @ngdoc overview
+          * @name widgetCore.kambiAPIService#parseFilterParameter
+          * @methodOf widgetCore.kambiAPIService
+          * @description
+          * Parses filter parameters that can either be 2-level arrays, flat arrays or a string
+          * @param {Array.<String>} filter Filter array
+          * @returns {string} Returns a string
+          */
+         kambiAPIService.parseFilterParameter = function ( filter ) {
+            var requestPath = '';
+            if ( filter != null ) {
+               if ( angular.isArray(filter) ) {
+                  var i = 0, filterLen = filter.length;
+                  for ( ; i < filterLen; ++i ) {
+                     if ( angular.isArray(filter[i]) ) {
+                        var j = 0, innerLen = filter[i].length;
+                        requestPath += '[';
+                        for ( ; j < innerLen; ++j ) {
+                           requestPath += filter[i][j];
+                           if ( j < innerLen - 1 ) {
+                              requestPath += ',';
+                           }
+                        }
+                        requestPath += ']';
+                     } else {
+                        requestPath += filter[i];
+                     }
+                     if ( i < filterLen - 1 ) {
+                        requestPath += ',';
+                     }
+                  }
+                  requestPath += '/';
+               } else if ( angular.isstring(filter) ) {
+                  requestPath = requestPath + filter;
+               }
+            } else {
+               requestPath += 'all/';
+            }
+
+            return requestPath;
+         };
+
+         /**
+          * @ngdoc overview
+          * @name widgetCore.kambiAPIService#getEventsByFilter
+          * @methodOf widgetCore.kambiAPIService
+          * @description
+          * Fetches the events based on the provided filter string
+          * @param {String} filter A preformatted filter string
+          * @param {Object} params An object containing the parameters to pass in the request
+          * @returns {Promise} Returns a promise
+          */
+         kambiAPIService.getEventsByFilter = function ( filter, params ) {
+            // Todo: Update this method once documentation is available
+            var requestPath = '/listView/' + filter;
+            return kambiAPIService.doRequest(requestPath, params, 'v3');
          };
 
          /**
@@ -1069,8 +1383,8 @@
           * @param {number} depth The limiting depth of the contained groups
           * @returns {Promise} Promise
           */
-         kambiAPIService.getGroupById = function(groupId, depth) {
-            var requestPath = '/group/'+groupId + '.json';
+         kambiAPIService.getGroupById = function ( groupId, depth ) {
+            var requestPath = '/group/' + groupId + '.json';
             return kambiAPIService.doRequest(requestPath, {
                depth: depth
             });
@@ -1083,15 +1397,17 @@
           * @description
           * Core method for calling the API, returns a promise
           * @param {string} requestPath The path to the request, following the offering id
-          * @param {params} [params] parameters
+          * @param {params} [params] parameters An object containing additional parameters to pass in the request
+          * @param {version} [version] A string with the api version to call, defaults to the configured version
           * @returns {Promise} Promise
           */
-         kambiAPIService.doRequest = function ( requestPath, params ) {
+         kambiAPIService.doRequest = function ( requestPath, params, version ) {
             return kambiAPIService.configDefer.promise.then(function () {
                if ( kambiAPIService.config.offering == null ) {
                   return $q.reject('The offering has not been set, please provide it in the widget arguments');
                } else {
-                  var requestUrl = kambiAPIService.config.apiBaseUrl + kambiAPIService.config.offering + requestPath;
+                  var apiUrl = kambiAPIService.config.apiBaseUrl.replace('{apiVersion}', (version != null ? version : kambiAPIService.config.version));
+                  var requestUrl = apiUrl + kambiAPIService.config.offering + requestPath;
                   var overrideParams = params || {};
                   var requestParams = {
                      lang: overrideParams.locale || kambiAPIService.config.locale,
@@ -1604,7 +1920,7 @@
       return $app
          .config(['$translateProvider', function ( $translateProvider ) {
             $translateProvider.preferredLanguage('en_GB');
-            $translateProvider.useSanitizeValueStrategy('sanitizeParameters');
+            $translateProvider.useSanitizeValueStrategy('escapeParameters');
             $translateProvider.useStaticFilesLoader({
                prefix: './i18n/',
                suffix: '.json'

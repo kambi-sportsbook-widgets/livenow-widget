@@ -8,12 +8,15 @@
    },
    "dependencies": {},
    "devDependencies": {
+      "changelog": "latest",
       "del": "^2.0.2",
       "gulp": "^3.9.0",
       "gulp-awspublish": "^3.0.1",
       "gulp-concat": "^2.6.0",
       "gulp-doxx": "0.0.5",
+      "gulp-file": "^0.2.0",
       "gulp-filter": "^3.0.1",
+      "gulp-foreach": "^0.1.0",
       "gulp-html-replace": "^1.5.4",
       "gulp-install": "^0.6.0",
       "gulp-jshint": "^1.11.2",
@@ -26,12 +29,13 @@
       "gulp-sourcemaps": "^1.6.0",
       "gulp-strip-debug": "^1.0.2",
       "gulp-uglify": "^1.4.2",
-      "changelog": "latest",
+      "json_merger": "^1.0.0",
       "kambi-sportsbook-widget-core-translate": "git+ssh://git@github.com/kambi-sportsbook-widgets/widget-core-translate.git",
-      "kambi-sportsbook-widget-library": "git+ssh://git@github.com/kambi-sportsbook-widgets/widget-library.git#0.9.2"
+      "kambi-sportsbook-widget-library": "git+ssh://git@github.com/kambi-sportsbook-widgets/widget-library.git",
+      "path": "^0.12.7"
    },
    "scripts": {
-      "changelog" : "changelog kambi-sportsbook-widgets/livenow-widget all -m > CHANGELOG.md",
+      "changelog": "changelog kambi-sportsbook-widgets/livenow-widget all -m > CHANGELOG.md",
       "test": "echo \"Error: no test specified\" && exit 1"
    },
    "repository": {

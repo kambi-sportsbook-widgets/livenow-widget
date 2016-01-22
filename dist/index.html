@@ -59,26 +59,26 @@
                   <!--Home set score-->
                   <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-5">
                      <div class="kw-event-team-stats {{key}}"
-                        ng-if="liveEvent.liveData.statistics.football && value > 0"
-                        ng-repeat="(key, value) in liveEvent.liveData.statistics.football.home">
+                          ng-if="liveEvent.liveData.statistics.football && value > 0"
+                          ng-repeat="(key, value) in liveEvent.liveData.statistics.football.home">
                      </div>
 
                      <div class="kw-event-team-sets l-flexed l-pack-center l-mr-10"
-                        ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.home.length && scoreset >= 0"
-                        ng-repeat="scoreset in liveEvent.liveData.statistics.sets.home track by $index">
+                          ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.home.length && scoreset >= 0"
+                          ng-repeat="scoreset in liveEvent.liveData.statistics.sets.home track by $index">
                         <strong class="l-pack-center l-flexbox">{{scoreset}}</strong>
                      </div>
                   </div>
                   <!--Away set score-->
                   <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-5">
                      <div class="kw-event-team-stats {{key}}"
-                        ng-if="liveEvent.liveData.statistics.football && value > 0"
-                        ng-repeat="(key, value) in liveEvent.liveData.statistics.football.away">
+                          ng-if="liveEvent.liveData.statistics.football && value > 0"
+                          ng-repeat="(key, value) in liveEvent.liveData.statistics.football.away">
                      </div>
 
                      <div class="kw-event-team-sets l-flexed l-pack-center l-mr-10"
-                        ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.away.length && scoreset >= 0"
-                        ng-repeat="scoreset in liveEvent.liveData.statistics.sets.away track by $index">
+                          ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.away.length && scoreset >= 0"
+                          ng-repeat="scoreset in liveEvent.liveData.statistics.sets.away track by $index">
                         <strong class="l-pack-center l-flexbox">{{scoreset}}</strong>
                      </div>
                   </div>
@@ -120,8 +120,8 @@
                  ng-repeat="outcome in liveEvent.mainBetOffer.outcomes"
                  ng-click="toggleOutcome(outcome)"
                  ng-class="{selected: outcome.selected===true}">
-               <span class="kw-event-outcome-label text-truncate l-flex-2 l-pr-5">{{getOutcomeLabel(outcome, liveEvent.event)}}</span>
-               <span class="kw-event-outcome-odds l-flex-1 l-flexbox l-align-end l-pack-end"><strong>{{outcome.odds/1000}}</strong></span>
+               <span class="kw-event-outcome-label text-truncate l-flex-2 l-pr-5">{{getOutcomeLabel(outcome, liveEvent.event)| translate}}</span>
+               <span class="kw-event-outcome-odds l-flex-1 l-flexbox l-align-end l-pack-end"><strong>{{getFormattedOdds(outcome)}}</strong></span>
             </div>
             <div class="l-flexbox l-expander l-flex-1 l-pack-center l-align-center"
                  ng-if="liveEvent.mainBetOffer.outcomes.length > 3">
