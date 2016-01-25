@@ -1,6 +1,20 @@
+2016-01-22
+==========
+
+  * Merge branch 'master' of github.com:kambi-sportsbook-widgets/livenow-widget
+    # Conflicts:
+    #    package.json
+  * Added core translations
+    Added handling of odds format change
+    New build
+  * Updated screenshot
+  * Added Screenshot
+
 2016-01-13
 ==========
 
+  * Updated README
+  * Added CHANGELOG
   * Removed the yellow cards icon as per 2016-01-12 meeting notes
 
 2015-12-18

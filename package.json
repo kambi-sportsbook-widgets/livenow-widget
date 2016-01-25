@@ -44,7 +44,8 @@
    },
    "author": "Michael Blom <michael@globalmouth.com",
    "contributors": [
-      "Andrei Teodorescu <andrei@globalmouth.com>"
+      "Andrei Teodorescu <andrei@globalmouth.com>",
+      "Dimitris Fasoulas <dimitris@globalmouth.com>"
    ],
    "license": "ISC",
    "homepage": "https://github.com/kambi-sportsbook-widgets/livenow-widget"
