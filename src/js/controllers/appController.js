@@ -131,7 +131,7 @@
       $scope.init().then(function () {
          //Set filter parameters
          if ( $scope.pageInfo.pageType === 'filter' ) {
-            $scope.params = $scope.pageInfo.pageParam + '/';
+            $scope.params = $scope.pageInfo.pageParam;
          } else {
             $scope.params = $scope.args.fallBackFilter;
          }

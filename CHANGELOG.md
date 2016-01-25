@@ -1,3 +1,8 @@
+2016-01-25
+==========
+
+  * Added filtering capabilities
+
 2016-01-22
 ==========
 
