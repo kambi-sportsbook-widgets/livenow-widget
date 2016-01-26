@@ -147,7 +147,7 @@
       $scope.init().then(function () {
          //Set filter parameters
          if ( $scope.pageInfo.pageType === 'filter' ) {
-            $scope.params = $scope.pageInfo.pageParam + '/';
+            $scope.params = $scope.pageInfo.pageParam;
          } else {
             $scope.params = $scope.args.fallBackFilter;
          }
@@ -185,6 +185,44 @@
    })(angular.module('livenowWidget'));
 
 }).call(this);
+
+(function () {
+
+   'use strict';
+
+   (function ( $app ) {
+
+      /**
+       * TimerService
+       */
+      return $app.service('timerService', ['$rootScope', '$interval', function ( $rootScope, $interval ) {
+
+         var timerService = {};
+
+         timerService.seconds = 0;
+
+         /**
+          * Start timer and broadcast an event
+          */
+         timerService.start = function() {
+            timerService.interval = $interval(function() {
+               timerService.seconds++;
+               $rootScope.$broadcast('TIMER:UPDATE', timerService.seconds);
+            }, 1000);
+         };
+
+         /**
+          * Stops the timer
+          */
+         timerService.stop = function() {
+            timerService.seconds = 0;
+            $interval.cancel(timerService.interval);
+         };
+
+         return timerService;
+      }]);
+   })(angular.module('livenowWidget'));
+})();
 
 /**
  * Timer directive
@@ -278,44 +316,6 @@
 
 })();
 
-(function () {
-
-   'use strict';
-
-   (function ( $app ) {
-
-      /**
-       * TimerService
-       */
-      return $app.service('timerService', ['$rootScope', '$interval', function ( $rootScope, $interval ) {
-
-         var timerService = {};
-
-         timerService.seconds = 0;
-
-         /**
-          * Start timer and broadcast an event
-          */
-         timerService.start = function() {
-            timerService.interval = $interval(function() {
-               timerService.seconds++;
-               $rootScope.$broadcast('TIMER:UPDATE', timerService.seconds);
-            }, 1000);
-         };
-
-         /**
-          * Stops the timer
-          */
-         timerService.stop = function() {
-            timerService.seconds = 0;
-            $interval.cancel(timerService.interval);
-         };
-
-         return timerService;
-      }]);
-   })(angular.module('livenowWidget'));
-})();
-
 /**
  * This controller takes care of the common widget implementations and should be extended by the widgets own controller(s)
  * @author Michael Blom <michael@globalmouth.com>
@@ -358,6 +358,15 @@
        * @returns {Boolean} Default false
        */
       $scope.appArgsSet = false;
+
+      /**
+       * @ngdoc property
+       * @name widgetCore.controller:pageInfoSet
+       * @propertyOf widgetCore.controller:widgetCoreController
+       * @description Flag to indicate that the page info have been received and set
+       * @returns {Boolean} Default false
+       */
+      $scope.pageInfoSet = false;
 
       /**
        * @ngdoc property
@@ -438,8 +447,8 @@
             $apiService.setConfig(data);
 
             $scope.apiConfigSet = true;
-            // Check if both page info and widget args have been received, if so resolve the init promise
-            if ( $scope.apiConfigSet && $scope.appArgsSet ) {
+            // Check if api configuration, page info and widget args have been received, if so resolve the init promise
+            if ( $scope.apiConfigSet && $scope.appArgsSet && $scope.pageInfoSet ) {
                initDeferred.resolve();
             }
             // Remove this listener
@@ -458,12 +467,24 @@
             }
 
             $scope.appArgsSet = true;
-            // Check if both page info and widget args have been received, if so resolve the init promise
-            if ( $scope.apiConfigSet && $scope.appArgsSet ) {
+            // Check if api configuration, page info and widget args have been received, if so resolve the init promise
+            if ( $scope.apiConfigSet && $scope.appArgsSet && $scope.pageInfoSet ) {
                initDeferred.resolve();
             }
             // Remove this listener
             removeWidgetArgsListener();
+         });
+
+         // Self-removing listener for the PAGE:INFO event
+         var removePageInfoListener = $scope.$on('PAGE:INFO', function ( event, data ) {
+            $scope.setPageInfo(data);
+            $scope.pageInfoSet = true;
+            // Check if api configuration, page info and widget args have been received, if so resolve the init promise
+            if ( $scope.apiConfigSet && $scope.appArgsSet && $scope.pageInfoSet ) {
+               initDeferred.resolve();
+            }
+
+            removePageInfoListener();
          });
 
          // Set the height of the widget and request the height so we can be sure that we have the correct value from the Sportsbook
@@ -477,6 +498,10 @@
 
          // Request the widget arguments
          $widgetService.requestWidgetArgs();
+
+         // Request the page info
+         $widgetService.requestPageInfo();
+
 
          // Request the outcomes from the betslip so we can update our widget, this will also sets up a subscription for future betslip updates
          $widgetService.requestBetslipOutcomes();
@@ -620,9 +645,6 @@
          $widgetService.requestPageInfo();
       };
 
-      $scope.requestPageInfo();
-
-
 
       /**
        * @ngdoc method
@@ -661,12 +683,7 @@
             case 'fractional':
                return outcome.oddsFractional;
             case 'american':
-               if(outcome.oddsAmerican > 0){
-                  return '+'+outcome.oddsAmerican;
-               } else {
-                  return outcome.oddsAmerican;
-               }
-               break;
+               return outcome.oddsAmerican;
             default:
                return outcome.odds / 1000;
 
@@ -797,6 +814,24 @@
 
       /**
        * @ngdoc method
+       * @name widgetCore.controller:widgetCoreController#setPageInfo
+       * @methodOf widgetCore.controller:widgetCoreController
+       * @description
+       * sets the page info for the app based on what we get from the PAGE:INFO event
+       * @param {Object} pageInfo Object containing date from the PAGE:INFO event
+       */
+      $scope.setPageInfo = function ( pageInfo ) {
+         // Check if the last character in the pageParam property is a slash, if not add it so we can use this property in filter requests
+         if ( pageInfo.pageType === 'filter' && pageInfo.pageParam.substr(-1) !== '/' ) {
+            pageInfo.pageParam += '/';
+         }
+
+
+         $scope.pageInfo = pageInfo;
+      };
+
+      /**
+       * @ngdoc method
        * @name widgetCore.controller:widgetCoreController#setPages
        * @methodOf widgetCore.controller:widgetCoreController
        * @description
@@ -871,175 +906,12 @@
          $scope.setOddsFormat(format);
          $scope.$apply();
       });
-
-      // Add a listener for the PAGE:INFO event and update page info
-      $scope.$on('PAGE:INFO', function ( event, info ) {
-         $scope.pageInfo = info;
-      });
-
    }
 
    (function ( $app ) {
       return $app.controller('widgetCoreController', ['$scope', 'kambiWidgetService', 'kambiAPIService', 'coreUtilsService', '$q', '$controller',
          widgetCoreController]);
    })(angular.module('widgetCore', []));
-
-})();
-
-/**
- * A pagination directive used for client-side pagination
- */
-(function () {
-
-   'use strict';
-
-   /**
-    * @ngdoc directive
-    * @name widgetCore.directive:kambiPaginationDirective
-    * @description
-    * A pagination directive used for client-side pagination
-    * @restrict E
-    * @scope    *
-    * @author teo@globalmouth.com
-    */
-   (function ( $app ) {
-      return $app.directive('kambiPaginationDirective', [function () {
-
-         return {
-            restrict: 'E',
-            scope: {
-               'list': '=list',
-               'listLimit': '=',
-               'pages': '=',
-               'startFrom': '=',
-               'activePage': '='
-            },
-            template: '<span ng-class="{disabled:activePage === 1}" ng-if="pages.length > 1" ng-click="pagePrev()" class="kw-page-link kw-pagination-arrow">' +
-            '<i class="ion-ios-arrow-left"></i></span>' +
-            '<span ng-if="pages.length > 1" ng-repeat="page in getPagination()" ng-click="setActivePage(page)" ng-class="{active:page === activePage}" ' +
-            'class="kw-page-link l-pack-center l-align-center">{{page}}</span>' +
-            '<span ng-class="{disabled:activePage === pages.length}" ng-if="pages.length > 1" ng-click="pageNext()" class="kw-page-link kw-pagination-arrow">' +
-            '<i class="ion-ios-arrow-right"></i></span>',
-            controller: ['$scope', function ( $scope ) {
-
-               /**
-                * @name widgetCore.directive:kambiPaginationDirective#activePage
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Default active page
-                * @type {number} Default active page
-                */
-               $scope.activePage = 1;
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#setPage
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the page
-                * @param {Object} page Page object
-                * @param {Integer} page.startFrom Display page starting with this index
-                * @param {Object} page.page Page object
-                */
-               $scope.setPage = function ( page ) {
-                  $scope.startFrom = page.startFrom;
-                  $scope.activePage = page.page;
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#setActivePage
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the current page. Takes in an integer, the index in array
-                * @param {Integer} page Page index
-                */
-               $scope.setActivePage = function ( page ) {
-                  $scope.setPage($scope.pages[page - 1]);
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#pagePrev
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the page to the previous one, if it's not already at the first page
-                */
-               $scope.pagePrev = function () {
-                  if ( $scope.activePage > 1 ) {
-                     $scope.setPage($scope.pages[$scope.activePage - 2]);
-                  }
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#pageNext
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the page to the next one, if it's not already at the last page
-                */
-               $scope.pageNext = function () {
-                  if ( $scope.activePage < $scope.pages.length ) {
-                     $scope.setPage($scope.pages[$scope.activePage]);
-                  }
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#pageCount
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Get the pagination amount of items based on liveevent and list limit
-                * @returns {Number} Returns the page count
-                */
-               $scope.pageCount = function () {
-                  return Math.ceil($scope.list.length / $scope.listLimit);
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#getPagination
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Get the pagination items.
-                * @returns {Array} An array with the pagination items, used in ng-repeat
-                */
-               $scope.getPagination = function () {
-                  var paginationItems = [],
-                     paginationLimit = 5,
-                     activePage = $scope.activePage,
-                     pageCount = $scope.pageCount();
-
-                  var startPage = 1, endPage = pageCount;
-
-                  if ( paginationLimit < pageCount ) {
-                     // Keep active page in middle by adjusting start and end
-                     startPage = Math.max(activePage - Math.floor(paginationLimit / 2), 1);
-                     endPage = startPage + paginationLimit - 1;
-
-                     // Shift the list start and end
-                     if ( endPage > pageCount ) {
-                        endPage = pageCount;
-                        startPage = endPage - paginationLimit + 1;
-                     }
-                  }
-
-                  // Add page number links
-                  for ( var i = startPage; i <= endPage; i++ ) {
-                     paginationItems.push(i);
-                  }
-
-                  //Return to first page if activePage is beyond the pagecount. Useful when pagecount changes due to filtering.
-                  if ( pageCount !== 0 && activePage > pageCount) {
-                     $scope.setActivePage(1);
-                  }
-
-                  return paginationItems;
-               };
-            }]
-         };
-      }]);
-   })(angular.module('widgetCore'));
 
 })();
 
@@ -1976,6 +1848,163 @@
          return kambiWidgetService;
       }]);
    })(angular.module('widgetCore'));
+})();
+
+/**
+ * A pagination directive used for client-side pagination
+ */
+(function () {
+
+   'use strict';
+
+   /**
+    * @ngdoc directive
+    * @name widgetCore.directive:kambiPaginationDirective
+    * @description
+    * A pagination directive used for client-side pagination
+    * @restrict E
+    * @scope    *
+    * @author teo@globalmouth.com
+    */
+   (function ( $app ) {
+      return $app.directive('kambiPaginationDirective', [function () {
+
+         return {
+            restrict: 'E',
+            scope: {
+               'list': '=list',
+               'listLimit': '=',
+               'pages': '=',
+               'startFrom': '=',
+               'activePage': '='
+            },
+            template: '<span ng-class="{disabled:activePage === 1}" ng-if="pages.length > 1" ng-click="pagePrev()" class="kw-page-link kw-pagination-arrow">' +
+            '<i class="ion-ios-arrow-left"></i></span>' +
+            '<span ng-if="pages.length > 1" ng-repeat="page in getPagination()" ng-click="setActivePage(page)" ng-class="{active:page === activePage}" ' +
+            'class="kw-page-link l-pack-center l-align-center">{{page}}</span>' +
+            '<span ng-class="{disabled:activePage === pages.length}" ng-if="pages.length > 1" ng-click="pageNext()" class="kw-page-link kw-pagination-arrow">' +
+            '<i class="ion-ios-arrow-right"></i></span>',
+            controller: ['$scope', function ( $scope ) {
+
+               /**
+                * @name widgetCore.directive:kambiPaginationDirective#activePage
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Default active page
+                * @type {number} Default active page
+                */
+               $scope.activePage = 1;
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#setPage
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the page
+                * @param {Object} page Page object
+                * @param {Integer} page.startFrom Display page starting with this index
+                * @param {Object} page.page Page object
+                */
+               $scope.setPage = function ( page ) {
+                  $scope.startFrom = page.startFrom;
+                  $scope.activePage = page.page;
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#setActivePage
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the current page. Takes in an integer, the index in array
+                * @param {Integer} page Page index
+                */
+               $scope.setActivePage = function ( page ) {
+                  $scope.setPage($scope.pages[page - 1]);
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#pagePrev
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the page to the previous one, if it's not already at the first page
+                */
+               $scope.pagePrev = function () {
+                  if ( $scope.activePage > 1 ) {
+                     $scope.setPage($scope.pages[$scope.activePage - 2]);
+                  }
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#pageNext
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the page to the next one, if it's not already at the last page
+                */
+               $scope.pageNext = function () {
+                  if ( $scope.activePage < $scope.pages.length ) {
+                     $scope.setPage($scope.pages[$scope.activePage]);
+                  }
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#pageCount
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Get the pagination amount of items based on liveevent and list limit
+                * @returns {Number} Returns the page count
+                */
+               $scope.pageCount = function () {
+                  return Math.ceil($scope.list.length / $scope.listLimit);
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#getPagination
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Get the pagination items.
+                * @returns {Array} An array with the pagination items, used in ng-repeat
+                */
+               $scope.getPagination = function () {
+                  var paginationItems = [],
+                     paginationLimit = 5,
+                     activePage = $scope.activePage,
+                     pageCount = $scope.pageCount();
+
+                  var startPage = 1, endPage = pageCount;
+
+                  if ( paginationLimit < pageCount ) {
+                     // Keep active page in middle by adjusting start and end
+                     startPage = Math.max(activePage - Math.floor(paginationLimit / 2), 1);
+                     endPage = startPage + paginationLimit - 1;
+
+                     // Shift the list start and end
+                     if ( endPage > pageCount ) {
+                        endPage = pageCount;
+                        startPage = endPage - paginationLimit + 1;
+                     }
+                  }
+
+                  // Add page number links
+                  for ( var i = startPage; i <= endPage; i++ ) {
+                     paginationItems.push(i);
+                  }
+
+                  //Return to first page if activePage is beyond the pagecount. Useful when pagecount changes due to filtering.
+                  if ( pageCount !== 0 && activePage > pageCount) {
+                     $scope.setActivePage(1);
+                  }
+
+                  return paginationItems;
+               };
+            }]
+         };
+      }]);
+   })(angular.module('widgetCore'));
+
 })();
 
 (function () {
