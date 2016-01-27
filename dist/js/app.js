@@ -186,44 +186,6 @@
 
 }).call(this);
 
-(function () {
-
-   'use strict';
-
-   (function ( $app ) {
-
-      /**
-       * TimerService
-       */
-      return $app.service('timerService', ['$rootScope', '$interval', function ( $rootScope, $interval ) {
-
-         var timerService = {};
-
-         timerService.seconds = 0;
-
-         /**
-          * Start timer and broadcast an event
-          */
-         timerService.start = function() {
-            timerService.interval = $interval(function() {
-               timerService.seconds++;
-               $rootScope.$broadcast('TIMER:UPDATE', timerService.seconds);
-            }, 1000);
-         };
-
-         /**
-          * Stops the timer
-          */
-         timerService.stop = function() {
-            timerService.seconds = 0;
-            $interval.cancel(timerService.interval);
-         };
-
-         return timerService;
-      }]);
-   })(angular.module('livenowWidget'));
-})();
-
 /**
  * Timer directive
  * @author teo@globalmouth.com
@@ -314,6 +276,44 @@
       }]);
    })(angular.module('livenowWidget'));
 
+})();
+
+(function () {
+
+   'use strict';
+
+   (function ( $app ) {
+
+      /**
+       * TimerService
+       */
+      return $app.service('timerService', ['$rootScope', '$interval', function ( $rootScope, $interval ) {
+
+         var timerService = {};
+
+         timerService.seconds = 0;
+
+         /**
+          * Start timer and broadcast an event
+          */
+         timerService.start = function() {
+            timerService.interval = $interval(function() {
+               timerService.seconds++;
+               $rootScope.$broadcast('TIMER:UPDATE', timerService.seconds);
+            }, 1000);
+         };
+
+         /**
+          * Stops the timer
+          */
+         timerService.stop = function() {
+            timerService.seconds = 0;
+            $interval.cancel(timerService.interval);
+         };
+
+         return timerService;
+      }]);
+   })(angular.module('livenowWidget'));
 })();
 
 /**
@@ -712,9 +712,7 @@
                if ( result < 2 ) {
                   result = Math.round(-100 / (result - 1 ));
                } else {
-                  result = (result - 1) * 100;
-                  // American odds need to show either + or - in front of value
-                  result = '+' + Math.round(result);
+                  result = Math.round((result - 1) * 100);
                }
                break;
             case 'fractional':
@@ -912,6 +910,163 @@
       return $app.controller('widgetCoreController', ['$scope', 'kambiWidgetService', 'kambiAPIService', 'coreUtilsService', '$q', '$controller',
          widgetCoreController]);
    })(angular.module('widgetCore', []));
+
+})();
+
+/**
+ * A pagination directive used for client-side pagination
+ */
+(function () {
+
+   'use strict';
+
+   /**
+    * @ngdoc directive
+    * @name widgetCore.directive:kambiPaginationDirective
+    * @description
+    * A pagination directive used for client-side pagination
+    * @restrict E
+    * @scope    *
+    * @author teo@globalmouth.com
+    */
+   (function ( $app ) {
+      return $app.directive('kambiPaginationDirective', [function () {
+
+         return {
+            restrict: 'E',
+            scope: {
+               'list': '=list',
+               'listLimit': '=',
+               'pages': '=',
+               'startFrom': '=',
+               'activePage': '='
+            },
+            template: '<span ng-class="{disabled:activePage === 1}" ng-if="pages.length > 1" ng-click="pagePrev()" class="kw-page-link kw-pagination-arrow">' +
+            '<i class="ion-ios-arrow-left"></i></span>' +
+            '<span ng-if="pages.length > 1" ng-repeat="page in getPagination()" ng-click="setActivePage(page)" ng-class="{active:page === activePage}" ' +
+            'class="kw-page-link l-pack-center l-align-center">{{page}}</span>' +
+            '<span ng-class="{disabled:activePage === pages.length}" ng-if="pages.length > 1" ng-click="pageNext()" class="kw-page-link kw-pagination-arrow">' +
+            '<i class="ion-ios-arrow-right"></i></span>',
+            controller: ['$scope', function ( $scope ) {
+
+               /**
+                * @name widgetCore.directive:kambiPaginationDirective#activePage
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Default active page
+                * @type {number} Default active page
+                */
+               $scope.activePage = 1;
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#setPage
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the page
+                * @param {Object} page Page object
+                * @param {Integer} page.startFrom Display page starting with this index
+                * @param {Object} page.page Page object
+                */
+               $scope.setPage = function ( page ) {
+                  $scope.startFrom = page.startFrom;
+                  $scope.activePage = page.page;
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#setActivePage
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the current page. Takes in an integer, the index in array
+                * @param {Integer} page Page index
+                */
+               $scope.setActivePage = function ( page ) {
+                  $scope.setPage($scope.pages[page - 1]);
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#pagePrev
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the page to the previous one, if it's not already at the first page
+                */
+               $scope.pagePrev = function () {
+                  if ( $scope.activePage > 1 ) {
+                     $scope.setPage($scope.pages[$scope.activePage - 2]);
+                  }
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#pageNext
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Sets the page to the next one, if it's not already at the last page
+                */
+               $scope.pageNext = function () {
+                  if ( $scope.activePage < $scope.pages.length ) {
+                     $scope.setPage($scope.pages[$scope.activePage]);
+                  }
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#pageCount
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Get the pagination amount of items based on liveevent and list limit
+                * @returns {Number} Returns the page count
+                */
+               $scope.pageCount = function () {
+                  return Math.ceil($scope.list.length / $scope.listLimit);
+               };
+
+               /**
+                * @ngdoc method
+                * @name widgetCore.directive:kambiPaginationDirective#getPagination
+                * @methodOf widgetCore.directive:kambiPaginationDirective
+                * @description
+                * Get the pagination items.
+                * @returns {Array} An array with the pagination items, used in ng-repeat
+                */
+               $scope.getPagination = function () {
+                  var paginationItems = [],
+                     paginationLimit = 5,
+                     activePage = $scope.activePage,
+                     pageCount = $scope.pageCount();
+
+                  var startPage = 1, endPage = pageCount;
+
+                  if ( paginationLimit < pageCount ) {
+                     // Keep active page in middle by adjusting start and end
+                     startPage = Math.max(activePage - Math.floor(paginationLimit / 2), 1);
+                     endPage = startPage + paginationLimit - 1;
+
+                     // Shift the list start and end
+                     if ( endPage > pageCount ) {
+                        endPage = pageCount;
+                        startPage = endPage - paginationLimit + 1;
+                     }
+                  }
+
+                  // Add page number links
+                  for ( var i = startPage; i <= endPage; i++ ) {
+                     paginationItems.push(i);
+                  }
+
+                  //Return to first page if activePage is beyond the pagecount. Useful when pagecount changes due to filtering.
+                  if ( pageCount !== 0 && activePage > pageCount) {
+                     $scope.setActivePage(1);
+                  }
+
+                  return paginationItems;
+               };
+            }]
+         };
+      }]);
+   })(angular.module('widgetCore'));
 
 })();
 
@@ -1850,163 +2005,6 @@
    })(angular.module('widgetCore'));
 })();
 
-/**
- * A pagination directive used for client-side pagination
- */
-(function () {
-
-   'use strict';
-
-   /**
-    * @ngdoc directive
-    * @name widgetCore.directive:kambiPaginationDirective
-    * @description
-    * A pagination directive used for client-side pagination
-    * @restrict E
-    * @scope    *
-    * @author teo@globalmouth.com
-    */
-   (function ( $app ) {
-      return $app.directive('kambiPaginationDirective', [function () {
-
-         return {
-            restrict: 'E',
-            scope: {
-               'list': '=list',
-               'listLimit': '=',
-               'pages': '=',
-               'startFrom': '=',
-               'activePage': '='
-            },
-            template: '<span ng-class="{disabled:activePage === 1}" ng-if="pages.length > 1" ng-click="pagePrev()" class="kw-page-link kw-pagination-arrow">' +
-            '<i class="ion-ios-arrow-left"></i></span>' +
-            '<span ng-if="pages.length > 1" ng-repeat="page in getPagination()" ng-click="setActivePage(page)" ng-class="{active:page === activePage}" ' +
-            'class="kw-page-link l-pack-center l-align-center">{{page}}</span>' +
-            '<span ng-class="{disabled:activePage === pages.length}" ng-if="pages.length > 1" ng-click="pageNext()" class="kw-page-link kw-pagination-arrow">' +
-            '<i class="ion-ios-arrow-right"></i></span>',
-            controller: ['$scope', function ( $scope ) {
-
-               /**
-                * @name widgetCore.directive:kambiPaginationDirective#activePage
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Default active page
-                * @type {number} Default active page
-                */
-               $scope.activePage = 1;
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#setPage
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the page
-                * @param {Object} page Page object
-                * @param {Integer} page.startFrom Display page starting with this index
-                * @param {Object} page.page Page object
-                */
-               $scope.setPage = function ( page ) {
-                  $scope.startFrom = page.startFrom;
-                  $scope.activePage = page.page;
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#setActivePage
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the current page. Takes in an integer, the index in array
-                * @param {Integer} page Page index
-                */
-               $scope.setActivePage = function ( page ) {
-                  $scope.setPage($scope.pages[page - 1]);
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#pagePrev
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the page to the previous one, if it's not already at the first page
-                */
-               $scope.pagePrev = function () {
-                  if ( $scope.activePage > 1 ) {
-                     $scope.setPage($scope.pages[$scope.activePage - 2]);
-                  }
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#pageNext
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Sets the page to the next one, if it's not already at the last page
-                */
-               $scope.pageNext = function () {
-                  if ( $scope.activePage < $scope.pages.length ) {
-                     $scope.setPage($scope.pages[$scope.activePage]);
-                  }
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#pageCount
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Get the pagination amount of items based on liveevent and list limit
-                * @returns {Number} Returns the page count
-                */
-               $scope.pageCount = function () {
-                  return Math.ceil($scope.list.length / $scope.listLimit);
-               };
-
-               /**
-                * @ngdoc method
-                * @name widgetCore.directive:kambiPaginationDirective#getPagination
-                * @methodOf widgetCore.directive:kambiPaginationDirective
-                * @description
-                * Get the pagination items.
-                * @returns {Array} An array with the pagination items, used in ng-repeat
-                */
-               $scope.getPagination = function () {
-                  var paginationItems = [],
-                     paginationLimit = 5,
-                     activePage = $scope.activePage,
-                     pageCount = $scope.pageCount();
-
-                  var startPage = 1, endPage = pageCount;
-
-                  if ( paginationLimit < pageCount ) {
-                     // Keep active page in middle by adjusting start and end
-                     startPage = Math.max(activePage - Math.floor(paginationLimit / 2), 1);
-                     endPage = startPage + paginationLimit - 1;
-
-                     // Shift the list start and end
-                     if ( endPage > pageCount ) {
-                        endPage = pageCount;
-                        startPage = endPage - paginationLimit + 1;
-                     }
-                  }
-
-                  // Add page number links
-                  for ( var i = startPage; i <= endPage; i++ ) {
-                     paginationItems.push(i);
-                  }
-
-                  //Return to first page if activePage is beyond the pagecount. Useful when pagecount changes due to filtering.
-                  if ( pageCount !== 0 && activePage > pageCount) {
-                     $scope.setActivePage(1);
-                  }
-
-                  return paginationItems;
-               };
-            }]
-         };
-      }]);
-   })(angular.module('widgetCore'));
-
-})();
-
 (function () {
 
    'use strict';
@@ -2030,7 +2028,7 @@
       return $app
          .config(['$translateProvider', function ( $translateProvider ) {
             $translateProvider.preferredLanguage('en_GB');
-            $translateProvider.useSanitizeValueStrategy('escapeParameters');
+            $translateProvider.useSanitizeValueStrategy('escapeParameters'); // Set to escape otherwise will not escape special characters
             $translateProvider.useStaticFilesLoader({
                prefix: './i18n/',
                suffix: '.json'
@@ -2044,9 +2042,9 @@
 })();
 
 /*!
- * angular-translate - v2.8.1 - 2015-10-01
+ * angular-translate - v2.9.0 - 2016-01-24
  * 
- * Copyright (c) 2015 The angular-translate team, Pascal Precht; Licensed MIT
+ * Copyright (c) 2016 The angular-translate team, Pascal Precht; Licensed MIT
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -2426,7 +2424,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         }
       };
 
-  var version = '2.8.1';
+  var version = '2.9.0';
 
   // tries to determine the browsers language
   var getFirstBrowserLanguage = function () {
@@ -2508,6 +2506,9 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
   };
 
   var negotiateLocale = function (preferred) {
+    if(!preferred) {
+      return;
+    }
 
     var avail = [],
         locale = angular.lowercase(preferred),
@@ -2518,6 +2519,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
       avail.push(angular.lowercase($availableLanguageKeys[i]));
     }
 
+    // Check for an exact match in our list of available keys
     if (indexOf(avail, locale) > -1) {
       return preferred;
     }
@@ -2541,16 +2543,15 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
       }
     }
 
-    if (preferred) {
-      var parts = preferred.split('_');
+    // Check for a language code without region
+    var parts = preferred.split('_');
 
-      if (parts.length > 1 && indexOf(avail, angular.lowercase(parts[0])) > -1) {
-        return parts[0];
-      }
+    if (parts.length > 1 && indexOf(avail, angular.lowercase(parts[0])) > -1) {
+      return parts[0];
     }
 
-    // If everything fails, just return the preferred, unchanged.
-    return preferred;
+    // If everything fails, return undefined.
+    return;
   };
 
   /**
@@ -3205,7 +3206,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
     if (!$availableLanguageKeys.length) {
       $preferredLanguage = locale;
     } else {
-      $preferredLanguage = negotiateLocale(locale);
+      $preferredLanguage = negotiateLocale(locale) || locale;
     }
 
     return this;
@@ -3340,6 +3341,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
    *                                     is the translation id and the value the translation.
    * @param {object=} interpolateParams An object hash for dynamic values
    * @param {string} interpolationId The id of the interpolation to use
+   * @param {string} forceLanguage A language to be used instead of the current language
    * @returns {object} promise
    */
   this.$get = [
@@ -3357,7 +3359,10 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           fallbackIndex,
           startFallbackIteration;
 
-      var $translate = function (translationId, interpolateParams, interpolationId, defaultTranslationText) {
+      var $translate = function (translationId, interpolateParams, interpolationId, defaultTranslationText, forceLanguage) {
+
+        var uses = (forceLanguage && forceLanguage !== $uses) ? // we don't want to re-negotiate $uses
+              (negotiateLocale(forceLanguage) || forceLanguage) : $uses;
 
         // Duck detection: If the first argument is an array, a bunch of translations was requested.
         // The result is an object.
@@ -3376,7 +3381,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
                 deferred.resolve([translationId, value]);
               };
               // we don't care whether the promise was resolved or rejected; just store the values
-              $translate(translationId, interpolateParams, interpolationId, defaultTranslationText).then(regardless, regardless);
+              $translate(translationId, interpolateParams, interpolationId, defaultTranslationText, forceLanguage).then(regardless, regardless);
               return deferred.promise;
             };
             for (var i = 0, c = translationIds.length; i < c; i++) {
@@ -3401,7 +3406,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         var promiseToWaitFor = (function () {
           var promise = $preferredLanguage ?
             langPromises[$preferredLanguage] :
-            langPromises[$uses];
+            langPromises[uses];
 
           fallbackIndex = 0;
 
@@ -3433,10 +3438,14 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           // no promise to wait for? okay. Then there's no loader registered
           // nor is a one pending for language that comes from storage.
           // We can just translate.
-          determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText).then(deferred.resolve, deferred.reject);
+          determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText, uses).then(deferred.resolve, deferred.reject);
         } else {
           var promiseResolved = function () {
-            determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText).then(deferred.resolve, deferred.reject);
+            // $uses may have changed while waiting
+            if (!forceLanguage) {
+              uses = $uses;
+            }
+            determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText, uses).then(deferred.resolve, deferred.reject);
           };
           promiseResolved.displayName = 'promiseResolved';
 
@@ -3809,11 +3818,11 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         return resolveForFallbackLanguageInstant((startFallbackIteration>0 ? startFallbackIteration : fallbackIndex), translationId, interpolateParams, Interpolator);
       };
 
-      var determineTranslation = function (translationId, interpolateParams, interpolationId, defaultTranslationText) {
+      var determineTranslation = function (translationId, interpolateParams, interpolationId, defaultTranslationText, uses) {
 
         var deferred = $q.defer();
 
-        var table = $uses ? $translationTable[$uses] : $translationTable,
+        var table = uses ? $translationTable[uses] : $translationTable,
             Interpolator = (interpolationId) ? interpolatorHashMap[interpolationId] : defaultInterpolator;
 
         // if the translation id exists, we can just interpolate it
@@ -3823,7 +3832,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           // If using link, rerun $translate with linked translationId and return it
           if (translation.substr(0, 2) === '@:') {
 
-            $translate(translation.substr(2), interpolateParams, interpolationId, defaultTranslationText)
+            $translate(translation.substr(2), interpolateParams, interpolationId, defaultTranslationText, uses)
               .then(deferred.resolve, deferred.reject);
           } else {
             deferred.resolve(Interpolator.interpolate(translation, interpolateParams));
@@ -3838,7 +3847,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           // since we couldn't translate the inital requested translation id,
           // we try it now with one or more fallback languages, if fallback language(s) is
           // configured.
-          if ($uses && $fallbackLanguage && $fallbackLanguage.length) {
+          if (uses && $fallbackLanguage && $fallbackLanguage.length) {
             fallbackTranslation(translationId, interpolateParams, Interpolator, defaultTranslationText)
                 .then(function (translation) {
                   deferred.resolve(translation);
@@ -3865,9 +3874,9 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         return deferred.promise;
       };
 
-      var determineTranslationInstant = function (translationId, interpolateParams, interpolationId) {
+      var determineTranslationInstant = function (translationId, interpolateParams, interpolationId, uses) {
 
-        var result, table = $uses ? $translationTable[$uses] : $translationTable,
+        var result, table = uses ? $translationTable[uses] : $translationTable,
             Interpolator = defaultInterpolator;
 
         // if the interpolation id exists use custom interpolator
@@ -3881,7 +3890,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
 
           // If using link, rerun $translate with linked translationId and return it
           if (translation.substr(0, 2) === '@:') {
-            result = determineTranslationInstant(translation.substr(2), interpolateParams, interpolationId);
+            result = determineTranslationInstant(translation.substr(2), interpolateParams, interpolationId, uses);
           } else {
             result = Interpolator.interpolate(translation, interpolateParams);
           }
@@ -3895,7 +3904,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           // since we couldn't translate the inital requested translation id,
           // we try it now with one or more fallback languages, if fallback language(s) is
           // configured.
-          if ($uses && $fallbackLanguage && $fallbackLanguage.length) {
+          if (uses && $fallbackLanguage && $fallbackLanguage.length) {
             fallbackIndex = 0;
             result = fallbackTranslationInstant(translationId, interpolateParams, Interpolator);
           } else if ($missingTranslationHandlerFactory && !pendingLoader && missingTranslationHandlerTranslation) {
@@ -4056,6 +4065,22 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
       $translate.storage = function () {
         return Storage;
       };
+
+      /**
+       * @ngdoc function
+       * @name pascalprecht.translate.$translate#negotiateLocale
+       * @methodOf pascalprecht.translate.$translate
+       *
+       * @description
+       * Returns a language key based on available languages and language aliases. If a
+       * language key cannot be resolved, returns undefined.
+       *
+       * If no or a falsy key is given, returns undefined.
+       *
+       * @param {string} [key] Language key
+       * @return {string|undefined} Language key or undefined if no language key is found.
+       */
+      $translate.negotiateLocale = negotiateLocale;
 
       /**
        * @ngdoc function
@@ -4292,10 +4317,15 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
        *                                     each key is the translation id and the value the translation.
        * @param {object} interpolateParams Params
        * @param {string} interpolationId The id of the interpolation to use
+       * @param {string} forceLanguage A language to be used instead of the current language
        *
        * @return {string|object} translation
        */
-      $translate.instant = function (translationId, interpolateParams, interpolationId) {
+      $translate.instant = function (translationId, interpolateParams, interpolationId, forceLanguage) {
+
+        // we don't want to re-negotiate $uses
+        var uses = (forceLanguage && forceLanguage !== $uses) ? // we don't want to re-negotiate $uses
+              (negotiateLocale(forceLanguage) || forceLanguage) : $uses;
 
         // Detect undefined and null values to shorten the execution and prevent exceptions
         if (translationId === null || angular.isUndefined(translationId)) {
@@ -4307,7 +4337,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         if (angular.isArray(translationId)) {
           var results = {};
           for (var i = 0, c = translationId.length; i < c; i++) {
-            results[translationId[i]] = $translate.instant(translationId[i], interpolateParams, interpolationId);
+            results[translationId[i]] = $translate.instant(translationId[i], interpolateParams, interpolationId, forceLanguage);
           }
           return results;
         }
@@ -4326,8 +4356,8 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         if ($preferredLanguage) {
           possibleLangKeys.push($preferredLanguage);
         }
-        if ($uses) {
-          possibleLangKeys.push($uses);
+        if (uses) {
+          possibleLangKeys.push(uses);
         }
         if ($fallbackLanguage && $fallbackLanguage.length) {
           possibleLangKeys = possibleLangKeys.concat($fallbackLanguage);
@@ -4336,9 +4366,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           var possibleLangKey = possibleLangKeys[j];
           if ($translationTable[possibleLangKey]) {
             if (typeof $translationTable[possibleLangKey][translationId] !== 'undefined') {
-              result = determineTranslationInstant(translationId, interpolateParams, interpolationId);
-            } else if ($notFoundIndicatorLeft || $notFoundIndicatorRight) {
-              result = applyNotFoundIndicators(translationId);
+              result = determineTranslationInstant(translationId, interpolateParams, interpolationId, uses);
             }
           }
           if (typeof result !== 'undefined') {
@@ -4347,10 +4375,14 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         }
 
         if (!result && result !== '') {
-          // Return translation of default interpolator if not found anything.
-          result = defaultInterpolator.interpolate(translationId, interpolateParams);
-          if ($missingTranslationHandlerFactory && !pendingLoader) {
-            result = translateByHandler(translationId, interpolateParams);
+          if ($notFoundIndicatorLeft || $notFoundIndicatorRight) {
+            result = applyNotFoundIndicators(translationId);
+          } else {
+            // Return translation of default interpolator if not found anything.
+            result = defaultInterpolator.interpolate(translationId, interpolateParams);
+            if ($missingTranslationHandlerFactory && !pendingLoader) {
+              result = translateByHandler(translationId, interpolateParams);
+            }
           }
         }
 
@@ -4589,7 +4621,7 @@ angular.module('pascalprecht.translate')
  * @requires $compile
  * @requires $filter
  * @requires $interpolate
- * @restrict A
+ * @restrict AE
  *
  * @description
  * Translates given translation id either through attribute or DOM content.
@@ -4757,7 +4789,8 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
                 });
               }
             } else {
-              translationIds.translate = iElementText;
+              // do not assigne the translation id if it is empty.
+              translationIds.translate = !iElementText ? undefined : iElementText;
             }
           } else {
             translationIds.translate = translationId;
@@ -4798,6 +4831,7 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
 
         iAttr.$observe('translateDefault', function (value) {
           scope.defaultText = value;
+          updateTranslations();
         });
 
         if (translateValuesExist) {
@@ -4842,7 +4876,7 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
               translationId = translateNamespace + translationId;
             }
 
-            $translate(translationId, interpolateParams, translateInterpolation, defaultTranslationText)
+            $translate(translationId, interpolateParams, translateInterpolation, defaultTranslationText, scope.translateLanguage)
               .then(function (translation) {
                 applyTranslation(translation, scope, true, translateAttr);
               }, function (translationId) {
@@ -4885,6 +4919,7 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
         if (translateValuesExist || translateValueExist || iAttr.translateDefault) {
           scope.$watch('interpolateParams', updateTranslations, true);
         }
+        scope.$watch('translateLanguage', updateTranslations);
 
         // Ensures the text will be refreshed after the current language was changed
         // w/ $translate.use(...)
@@ -4951,7 +4986,7 @@ angular.module('pascalprecht.translate')
  */
 .directive('translateCloak', translateCloakDirective);
 
-function translateCloakDirective($translate) {
+function translateCloakDirective($translate, $rootScope) {
 
   'use strict';
 
@@ -4969,17 +5004,21 @@ function translateCloakDirective($translate) {
       applyCloak();
 
       return function linkFn(scope, iElement, iAttr) {
-        // Register a watcher for the defined translation allowing a fine tuned cloak
         if (iAttr.translateCloak && iAttr.translateCloak.length) {
+          // Register a watcher for the defined translation allowing a fine tuned cloak
           iAttr.$observe('translateCloak', function (translationId) {
             $translate(translationId).then(removeCloak, applyCloak);
+          });
+          // Register for change events as this is being another indicicator revalidating the cloak)
+          $rootScope.$on('$translateChangeSuccess', function () {
+            $translate(iAttr.translateCloak).then(removeCloak, applyCloak);
           });
         }
       };
     }
   };
 }
-translateCloakDirective.$inject = ['$translate'];
+translateCloakDirective.$inject = ['$translate', '$rootScope'];
 
 translateCloakDirective.displayName = 'translateCloakDirective';
 
@@ -5078,6 +5117,73 @@ translateNamespaceDirective.displayName = 'translateNamespaceDirective';
 
 angular.module('pascalprecht.translate')
 /**
+ * @ngdoc directive
+ * @name pascalprecht.translate.directive:translateLanguage
+ * @restrict A
+ *
+ * @description
+ * Forces the language to the directives in the underlying scope.
+ *
+ * @param {string=} translate language that will be negotiated.
+ *
+ * @example
+   <example module="ngView">
+    <file name="index.html">
+      <div>
+
+        <div>
+            <h1 translate>HELLO</h1>
+        </div>
+
+        <div translate-language="de">
+            <h1 translate>HELLO</h1>
+        </div>
+
+      </div>
+    </file>
+    <file name="script.js">
+      angular.module('ngView', ['pascalprecht.translate'])
+
+      .config(function ($translateProvider) {
+
+        $translateProvider
+          .translations('en',{
+            'HELLO': 'Hello world!'
+          })
+          .translations('de',{
+            'HELLO': 'Hallo Welt!'
+          })
+          .translations(.preferredLanguage('en');
+
+      });
+
+    </file>
+   </example>
+ */
+.directive('translateLanguage', translateLanguageDirective);
+
+function translateLanguageDirective() {
+
+  'use strict';
+
+  return {
+    restrict: 'A',
+    scope: true,
+    compile: function () {
+      return function linkFn(scope, iElement, iAttrs) {
+        iAttrs.$observe('translateLanguage', function (newTranslateLanguage) {
+          scope.translateLanguage = newTranslateLanguage;
+        });
+      };
+    }
+  };
+}
+
+translateLanguageDirective.displayName = 'translateLanguageDirective';
+
+
+angular.module('pascalprecht.translate')
+/**
  * @ngdoc filter
  * @name pascalprecht.translate.filter:translate
  * @requires $parse
@@ -5134,13 +5240,13 @@ function translateFilterFactory($parse, $translate) {
 
   'use strict';
 
-  var translateFilter = function (translationId, interpolateParams, interpolation) {
+  var translateFilter = function (translationId, interpolateParams, interpolation, forceLanguage) {
 
     if (!angular.isObject(interpolateParams)) {
       interpolateParams = $parse(interpolateParams)(this);
     }
 
-    return $translate.instant(translationId, interpolateParams, interpolation);
+    return $translate.instant(translationId, interpolateParams, interpolation, forceLanguage);
   };
 
   if ($translate.statefulFilter()) {
@@ -5183,9 +5289,9 @@ return 'pascalprecht.translate';
 }));
 
 /*!
- * angular-translate - v2.8.1 - 2015-10-01
+ * angular-translate - v2.9.0 - 2016-01-24
  * 
- * Copyright (c) 2015 The angular-translate team, Pascal Precht; Licensed MIT
+ * Copyright (c) 2016 The angular-translate team, Pascal Precht; Licensed MIT
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -5257,8 +5363,7 @@ function $translateStaticFilesLoader($q, $http) {
         });
     };
 
-    var deferred = $q.defer(),
-        promises = [],
+    var promises = [],
         length = options.files.length;
 
     for (var i = 0; i < length; i++) {
@@ -5269,7 +5374,7 @@ function $translateStaticFilesLoader($q, $http) {
       }));
     }
 
-    $q.all(promises)
+    return $q.all(promises)
       .then(function (data) {
         var length = data.length,
             mergedData = {};
@@ -5280,12 +5385,8 @@ function $translateStaticFilesLoader($q, $http) {
           }
         }
 
-        deferred.resolve(mergedData);
-      }, function (data) {
-        deferred.reject(data);
+        return mergedData;
       });
-
-    return deferred.promise;
   };
 }
 $translateStaticFilesLoader.$inject = ['$q', '$http'];
