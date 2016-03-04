@@ -2,12 +2,12 @@
 
    'use strict';
 
-   (function ( $app ) {
+   (function ($app) {
 
       /**
        * TimerService
        */
-      return $app.service('timerService', ['$rootScope', '$interval', function ( $rootScope, $interval ) {
+      return $app.service('timerService', ['$rootScope', '$interval', function ($rootScope, $interval) {
 
          var timerService = {};
 
@@ -16,8 +16,8 @@
          /**
           * Start timer and broadcast an event
           */
-         timerService.start = function() {
-            timerService.interval = $interval(function() {
+         timerService.start = function () {
+            timerService.interval = $interval(function () {
                timerService.seconds++;
                $rootScope.$broadcast('TIMER:UPDATE', timerService.seconds);
             }, 1000);
@@ -26,7 +26,7 @@
          /**
           * Stops the timer
           */
-         timerService.stop = function() {
+         timerService.stop = function () {
             timerService.seconds = 0;
             $interval.cancel(timerService.interval);
          };
