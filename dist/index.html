@@ -30,7 +30,7 @@
    <script src="//kambi-cdn.globalmouth.com/lib/dist/js/app.min.js"></script>
 
    <script src="//kambi-cdn.globalmouth.com/translate/dist/translate.min.js"></script>
-   
+
    <script src="https://c3-static.kambi.com/sb-mobileclient/widget-api/1.0.0.7/kambi-widget-api.js"></script>
 </head>
 <body class="kw-body">
@@ -51,15 +51,15 @@
             <div class="kw-event-header l-flexbox l-horizontal" ng-click="navigateToLiveEvent(liveEvent.event.id)">
 
                <!--Team name-->
-               <div class="l-flexbox l-vertical l-flexed">
+               <div class="l-flexbox l-vertical l-flexed l-flex-3">
                   <div class="l-flexbox">
                      <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.sets.homeServe}"></span>
-                     <span class="l-flexbox">{{liveEvent.event.homeName}}</span>
+                     <span class="text-truncate">{{liveEvent.event.homeName}}</span>
                   </div>
 
                   <div class="l-flexbox">
                      <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.sets.homeServe === false}"></span>
-                     <span class="l-flexbox">{{liveEvent.event.awayName}}</span>
+                     <span class="text-truncate">{{liveEvent.event.awayName}}</span>
                   </div>
                </div>
 

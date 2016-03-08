@@ -14,7 +14,7 @@
 }
 
 .kw-event-path {
-   width: 100%;
+   width: 80%;
 
    .kw-path {
       @include flex(0 1 auto);
@@ -67,5 +67,3 @@
    top: 50%;
    width: 6px;
 }
-
-
