@@ -56,18 +56,19 @@
    <script src="https://c3-static.kambi.com/sb-mobileclient/widget-api/1.0.0.8/kambi-widget-api.js"></script>
 </head>
 <body class="kw-body">
-<div class="kw-card l-flexbox l-vertical l-expander" ng-controller="appController">
+<div class="KambiWidget-card-background-color KambiWidget-card-text-color KambiWidget-card-background-color--hoverable l-flexbox l-vertical l-expander"
+     ng-controller="appController">
    <!--Header-->
-   <header class="kw-header l-pl-16">{{'TITLE' | translate }} ({{liveEvents.length}})</header>
+   <header class="kw-header KambiWidget-header l-pl-16">{{'TITLE' | translate }} ({{liveEvents.length}})</header>
 
    <!--Main-->
    <main class="l-flexbox l-vertical l-flexed l-pack-start">
-      <div class="kw-event l-flexbox l-vertical l-pb-12 l-pt-12 l-pl-16 l-pr-16"
+      <div class="kw-event l-flexbox l-vertical l-pb-12 l-pt-12"
            ng-class="{'anim-fade-in': enableAnimation}"
            ng-repeat="liveEvent in liveEvents | startFrom: startFrom | limitTo : args.listLimit">
 
          <!--Competitors and path-->
-         <div class="kw-event-name-container l-flexbox l-vertical l-pack-start l-flex-3">
+         <div class="kw-event-name-container l-flexbox l-vertical l-pack-start l-flex-3 l-pl-16 l-pr-16">
 
             <!--Competitors-->
             <div class="kw-event-header l-flexbox l-horizontal" ng-click="navigateToLiveEvent(liveEvent.event.id)">
@@ -145,22 +146,22 @@
          </div>
 
          <!--Outcomes-->
-         <div class="kw-event-outcomes l-flexbox">
-            <div class="kw-event-outcome l-flex-1 l-flexbox l-horizontal"
-                 ng-if="liveEvent.mainBetOffer.outcomes.length <= 3"
-                 ng-repeat="outcome in liveEvent.mainBetOffer.outcomes"
-                 ng-click="toggleOutcome(outcome)"
-                 ng-class="{selected: outcome.selected===true}">
-               <span class="kw-event-outcome-label text-truncate l-flex-2 l-pr-6">{{getOutcomeLabel(outcome, liveEvent.event)| translate}}</span>
-               <span class="kw-event-outcome-odds l-flex-1 l-flexbox l-align-end l-pack-end"><strong>{{getFormattedOdds(outcome)}}</strong></span>
-            </div>
-            <div class="l-flexbox l-expander l-flex-1 l-pack-center l-align-center"
-                 ng-if="liveEvent.mainBetOffer.outcomes.length > 3">
-               {{liveEvent.mainBetOffer.outcomes.length }} outcomes
-            </div>
-            <div class="l-flexbox l-flex-1 l-pack-center" ng-if="!liveEvent.mainBetOffer">
-            </div>
+         <div class="kw-event-outcomes l-flexbox l-pr-6">
+            <button ng-repeat="outcome in liveEvent.mainBetOffer.outcomes" ng-if="liveEvent.mainBetOffer.outcomes.length <= 3"
+                    ng-click="toggleOutcome(outcome)" ng-class="{'KambiWidget-outcome--selected': outcome.selected===true}"
+                    type="button" role="button" class="KambiWidget-outcome kw-link l-ml-6 l-flex-1">
+               <div class="KambiWidget-outcome__flexwrap">
+                  <div class="KambiWidget-outcome__label-wrapper">
+                     <span class="KambiWidget-outcome__label">{{getOutcomeLabel(outcome, liveEvent.event)| translate}}</span>
+                     <span class="KambiWidget-outcome__line"></span>
+                  </div>
+                  <div class="KambiWidget-outcome__odds-wrapper">
+                     <span class="KambiWidget-outcome__odds">{{getFormattedOdds(outcome)}}</span>
+                  </div>
+               </div>
+            </button>
          </div>
+
       </div>
    </main>
    <!--Footer-->
