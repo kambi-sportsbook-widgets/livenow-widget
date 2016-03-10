@@ -99,7 +99,7 @@ strong.stronger {
   font-weight: bolder;
 }
 
-.kw-btn, .kw-event-outcome {
+.kw-btn {
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   border-radius: 2px;
@@ -112,18 +112,11 @@ strong.stronger {
   margin: 5px 5px 5px 0;
   padding: 7px 10px;
 }
-.kw-btn:last-child, .kw-event-outcome:last-child {
+.kw-btn:last-child {
   margin-right: 0;
 }
-.kw-btn:hover, .kw-event-outcome:hover {
+.kw-btn:hover {
   cursor: pointer;
-}
-.kw-btn.disabled, .disabled.kw-event-outcome {
-  background-color: #f6f6f6;
-}
-.kw-btn.disabled:hover, .disabled.kw-event-outcome:hover {
-  cursor: not-allowed;
-  background-color: #f6f6f6;
 }
 
 .kw-header {
@@ -135,9 +128,6 @@ strong.stronger {
 }
 
 .kw-footer {
-  -moz-border-radius: 0 0 2px 2px;
-  -webkit-border-radius: 0;
-  border-radius: 0 0 2px 2px;
   text-align: center;
 }
 
@@ -178,7 +168,6 @@ strong.stronger {
 }
 
 .kw-event-path {
-  font-family: "roboto", sans-serif;
   font-size: 12px;
   line-height: 1.4;
 }
@@ -210,48 +199,42 @@ strong.stronger {
   min-width: 50%;
 }
 
-body {
-  background-color: white;
-  color: #333;
-}
-
 a {
   color: #333;
-}
-
-.kw-card, .kw-footer, .kw-pagination {
-  background-color: #f6f6f6;
-}
-
-.kw-header {
-  border-bottom: solid 1px #EAEAEA;
-  color: #999;
 }
 
 .kw-footer {
   border-top: solid 1px #EAEAEA;
 }
 
-.kw-btn, .kw-event-outcome {
+.kw-btn {
   background-color: white;
   border: 1px solid #EEE;
   color: #999;
 }
 
-.kw-btn:hover, .kw-event-outcome:hover {
+.kw-btn:hover {
   background-color: #E6F9FC;
 }
 
-.kw-btn.selected, .selected.kw-event-outcome {
+.kw-btn.selected {
   background-color: #00c1de;
   color: white;
 }
 
-.kw-btn.selected .kw-event-outcome-odds, .selected.kw-event-outcome .kw-event-outcome-odds {
+.kw-btn.disabled {
+  background-color: #f6f6f6;
+}
+.kw-btn.disabled:hover {
+  cursor: not-allowed;
+  background-color: #f6f6f6;
+}
+
+.kw-btn.selected .kw-event-outcome-odds {
   color: white;
 }
 
-.kw-btn.selected .kw-event-outcome-label, .selected.kw-event-outcome .kw-event-outcome-label {
+.kw-btn.selected .kw-event-outcome-label {
   color: white;
   opacity: 0.85;
 }
@@ -264,23 +247,11 @@ a {
   background-color: #f0f0f0;
 }
 
-.kw-event-outcome-odds {
-  color: #333;
-}
-
-.kw-event-path {
-  color: #999;
-}
-
 .kw-page-link.active, .kw-page-link:hover {
-  background-color: white;
-  color: #999;
+  background-color: #f0f0f0;
 }
 
 .kw-pagination {
-  -moz-border-radius: 0 0 2px 2px;
-  -webkit-border-radius: 0;
-  border-radius: 0 0 2px 2px;
   text-align: center;
 }
 
