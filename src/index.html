@@ -163,6 +163,13 @@
                   </div>
                </div>
             </button>
+            <div class="l-flexbox l-expander l-flex-1 l-pack-center l-align-center"
+                 ng-if="liveEvent.mainBetOffer.outcomes.length > 3">
+               {{liveEvent.mainBetOffer.outcomes.length }} outcomes
+            </div>
+            <div class="l-flexbox l-flex-1 l-pack-center" ng-if="!liveEvent.mainBetOffer">
+            </div>
+
          </div>
 
       </div>
