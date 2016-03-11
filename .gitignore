@@ -3,6 +3,7 @@ node_modules
 .awspublish-*
 .buildTemp
 .compiledTemp
+/src/mockSetupData.json
 .sass-cache/
 docs
 *.map
