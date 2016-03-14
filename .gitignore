@@ -3,9 +3,9 @@ node_modules
 .awspublish-*
 .buildTemp
 .compiledTemp
-/src/mockSetupData.json
 .sass-cache/
 docs
 *.map
 bower_components
 /.project
+mockSetupData.json
