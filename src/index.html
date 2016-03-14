@@ -59,14 +59,14 @@
    <!-- endbuild -->
 </head>
 <body class="kw-body">
-<div class="KambiWidget-card-background-color KambiWidget-card-text-color KambiWidget-card-background-color--hoverable l-flexbox l-vertical l-expander"
+<div class="KambiWidget-card-background-color KambiWidget-card-text-color l-flexbox l-vertical l-expander"
      ng-controller="appController">
    <!--Header-->
    <header class="kw-header KambiWidget-header l-pl-16">{{'TITLE' | translate }} ({{liveEvents.length}})</header>
 
    <!--Main-->
    <main class="l-flexbox l-vertical l-flexed l-pack-start">
-      <div class="kw-event l-flexbox l-vertical l-pb-12 l-pt-12"
+      <div class="kw-event KambiWidget-card-background-color--hoverable l-flexbox l-vertical l-pb-12 l-pt-12"
            ng-class="{'anim-fade-in': enableAnimation}"
            ng-repeat="liveEvent in liveEvents | startFrom: startFrom | limitTo : args.listLimit">
 
@@ -131,7 +131,7 @@
 
             <div class="l-flexbox">
                <!--Event path-->
-               <div class="kw-event-path l-flexbox l-horizontal l-flexed l-pt-6">
+               <div class="kw-event-path KambiWidget-card-support-text-color l-flexbox l-horizontal l-flexed l-pt-6">
                   <div class="l-flexbox" ng-repeat="p in liveEvent.event.path"
                        style="max-width: {{ 100 / liveEvent.event.path.length }}%">
                   <span class="kw-event-path-name l-flexbox l-flex-3">
