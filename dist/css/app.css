@@ -4,9 +4,9 @@
 
 .kw-page-link {
   cursor: pointer;
-  padding: 5px 3px;
-  min-width: 20px;
   font-size: 10px;
+  min-width: 20px;
+  padding: 6px 3px;
 }
 .kw-page-link.disabled {
   cursor: not-allowed;
@@ -17,7 +17,7 @@
 }
 
 .kw-pagination-arrow {
-  min-width: 35px;
+  min-width: 37px;
 }
 
 .animated {
