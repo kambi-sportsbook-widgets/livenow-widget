@@ -38,13 +38,13 @@
 <div class="KambiWidget-card-background-color KambiWidget-card-text-color l-flexbox l-vertical l-expander"
      ng-controller="appController">
    <!--Header-->
-   <header class="kw-header KambiWidget-header l-pl-16">{{'TITLE' | translate }} ({{liveEvents.length}})</header>
+   <header class="kw-header KambiWidget-header l-pl-16">{{'TITLE' | translate }} ({{events.length}})</header>
 
    <!--Main-->
    <main class="l-flexbox l-vertical l-flexed l-pack-start">
       <div class="kw-event KambiWidget-card-background-color--hoverable l-flexbox l-vertical l-pb-12 l-pt-12"
            ng-class="{'anim-fade-in': enableAnimation}"
-           ng-repeat="liveEvent in liveEvents | startFrom: startFrom | limitTo : args.listLimit">
+           ng-repeat="liveEvent in events | startFrom: startFrom | limitTo : args.listLimit">
 
          <!--Competitors and path-->
          <div class="kw-event-name-container l-flexbox l-vertical l-pack-start l-flex-3 l-pl-16 l-pr-16">
@@ -55,12 +55,12 @@
                <!--Team name-->
                <div class="l-flexbox l-vertical l-flexed l-flex-3">
                   <div class="l-flexbox">
-                     <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.sets.homeServe}"></span>
+                     <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.setBasedStats.homeServe}"></span>
                      <span class="text-truncate">{{liveEvent.event.homeName}}</span>
                   </div>
 
                   <div class="l-flexbox">
-                     <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.sets.homeServe === false}"></span>
+                     <span ng-class="{'kw-serve animated infinite': liveEvent.liveData.statistics.setBasedStats.homeServe === false}"></span>
                      <span class="text-truncate">{{liveEvent.event.awayName}}</span>
                   </div>
                </div>
@@ -70,26 +70,26 @@
                   <!--Home set score-->
                   <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-6">
                      <div class="kw-event-team-stats {{key}}"
-                          ng-if="liveEvent.liveData.statistics.football && value > 0"
-                          ng-repeat="(key, value) in liveEvent.liveData.statistics.football.home">
+                          ng-if="liveEvent.liveData.statistics.footballStats && value > 0"
+                          ng-repeat="(key, value) in liveEvent.liveData.statistics.footballStats.home">
                      </div>
 
                      <div class="kw-event-team-sets l-flexed l-pack-center l-mr-12"
-                          ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.home.length && scoreset >= 0"
-                          ng-repeat="scoreset in liveEvent.liveData.statistics.sets.home track by $index">
+                          ng-if="liveEvent.liveData.statistics.setBasedStats && liveEvent.liveData.statistics.setBasedStats.home.length && scoreset >= 0"
+                          ng-repeat="scoreset in liveEvent.liveData.statistics.setBasedStats.home track by $index">
                         <strong class="l-pack-center l-flexbox">{{scoreset}}</strong>
                      </div>
                   </div>
                   <!--Away set score-->
                   <div ng-if="liveEvent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-6">
                      <div class="kw-event-team-stats {{key}}"
-                          ng-if="liveEvent.liveData.statistics.football && value > 0"
-                          ng-repeat="(key, value) in liveEvent.liveData.statistics.football.away">
+                          ng-if="liveEvent.liveData.statistics.footballStats && value > 0"
+                          ng-repeat="(key, value) in liveEvent.liveData.statistics.footballStats.away">
                      </div>
 
                      <div class="kw-event-team-sets l-flexed l-pack-center l-mr-12"
-                          ng-if="liveEvent.liveData.statistics.sets && liveEvent.liveData.statistics.sets.away.length && scoreset >= 0"
-                          ng-repeat="scoreset in liveEvent.liveData.statistics.sets.away track by $index">
+                          ng-if="liveEvent.liveData.statistics.setBasedStats && liveEvent.liveData.statistics.setBasedStats.away.length && scoreset >= 0"
+                          ng-repeat="scoreset in liveEvent.liveData.statistics.setBasedStats.away track by $index">
                         <strong class="l-pack-center l-flexbox">{{scoreset}}</strong>
                      </div>
                   </div>
@@ -97,9 +97,9 @@
 
                <!--Score-->
                <div class="kw-event-score l-flexbox l-vertical">
-                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }"
+                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.setBasedStats }"
                         class="l-flexbox l-pack-end"><strong>{{liveEvent.liveData.score.home}}</strong></span>
-                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.sets }"
+                  <span ng-class="{'kw-sets': liveEvent.liveData.statistics.setBasedStats }"
                         class="l-flexbox l-pack-end"><strong>{{liveEvent.liveData.score.away}}</strong></span>
                </div>
 
@@ -119,15 +119,19 @@
 
                <!--Event time-->
                <div class="kw-event-time l-pt-6">
-                  <timer-directive class="l-flexbox l-pack-center" index="$index" timer="liveEvent.liveData.matchClock"></timer-directive>
+                  <timer-directive class="l-flexbox l-pack-center" index="$index" timer="liveEvent.liveData.matchClock"
+                                   ng-if="liveEvent.liveData.matchClock != null"></timer-directive>
                </div>
             </div>
          </div>
 
          <!--Outcomes-->
-         <div class="kw-event-outcomes l-flexbox l-pr-6">
-            <button ng-repeat="outcome in liveEvent.mainBetOffer.outcomes" ng-if="liveEvent.mainBetOffer.outcomes.length <= 3"
-                    ng-click="toggleOutcome(outcome)" ng-class="{'KambiWidget-outcome--selected': outcome.selected===true}"
+         <div class="kw-event-outcomes l-flexbox l-pr-6" ng-if="liveEvent.betOffers != null && liveEvent.betOffers.length > 0">
+            <button ng-repeat="outcome in liveEvent.betOffers[0].outcomes" ng-if="liveEvent.betOffers[0].outcomes.length <= 3"
+                    ng-click="toggleOutcome(outcome)"
+                    ng-disabled="liveEvent.betOffers[0].suspended == true"
+                    ng-class="{'KambiWidget-outcome--selected': outcome.selected===true,
+                               'KambiWidget-outcome--suspended': liveEvent.betOffers[0].suspended == true}"
                     type="button" role="button" class="KambiWidget-outcome kw-link l-ml-6 l-flex-1">
                <div class="KambiWidget-outcome__flexwrap">
                   <div class="KambiWidget-outcome__label-wrapper">
@@ -140,10 +144,10 @@
                </div>
             </button>
             <div class="l-flexbox l-expander l-flex-1 l-pack-center l-align-center"
-                 ng-if="liveEvent.mainBetOffer.outcomes.length > 3">
-               {{liveEvent.mainBetOffer.outcomes.length }} outcomes
+                 ng-if="liveEvent.betOffers[0].outcomes.length > 3">
+               {{liveEvent.betOffers[0].outcomes.length }} outcomes
             </div>
-            <div class="l-flexbox l-flex-1 l-pack-center" ng-if="!liveEvent.mainBetOffer">
+            <div class="l-flexbox l-flex-1 l-pack-center" ng-if="!liveEvent.betOffers[0]">
             </div>
 
          </div>
@@ -153,7 +157,7 @@
    <!--Footer-->
    <footer class="kw-footer">
       <kambi-pagination-directive class="kw-pagination l-flexbox l-pack-center l-align-center"
-                                  list="liveEvents"
+                                  list="events"
                                   pages="pages"
                                   start-from="startFrom"
                                   list-limit="args.listLimit"></kambi-pagination-directive>

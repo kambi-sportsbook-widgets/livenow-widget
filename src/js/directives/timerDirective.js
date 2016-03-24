@@ -15,7 +15,7 @@
     * @scope    *
     * @author teo@globalmouth.com
     */
-   (function ($app) {
+   (function ( $app ) {
       return $app.directive('timerDirective', [function () {
 
          return {
@@ -25,15 +25,19 @@
                'timer': '='
             },
             template: '<span ng-if="minute || second" ng-cloak>{{minute}} : {{second}}</span>',
-            controller: ['$scope', '$rootScope', 'timerService', function ($scope, $rootScope, timerService) {
+            controller: ['$scope', '$rootScope', 'timerService', function ( $scope, $rootScope, timerService ) {
 
                /**
                 * Prepends a zero for numbers below 10
                 * @param time
                 * @returns {*}
                 */
-               var readableTime = function (time) {
-                  if (time < 10) {
+               var readableTime = function ( time ) {
+                  if ( time < 0 ) {
+                     time = 0;
+                  }
+
+                  if ( time < 10 ) {
                      time = '0' + time;
                   }
                   return time;
@@ -44,7 +48,7 @@
                 * @param count
                 * @returns {{minutes, seconds}}
                 */
-               var parseSeconds = function (count) {
+               var parseSeconds = function ( count ) {
                   var input_count = parseInt(count, 10);
                   var minutes = Math.floor(input_count / 60);
                   var seconds = input_count - (minutes * 60);
@@ -58,10 +62,9 @@
                 * Get the current event minute and second based on event data and internal timer
                 * @param count
                 */
-               var getRealTime = function (count) {
-                  var eventSeconds = $scope.timer.minute * 60 + $scope.timer.second + count;
-
-                  if ($scope.timer.running) {
+               var getRealTime = function ( count ) {
+                  if ( $scope.timer && $scope.timer.running ) {
+                     var eventSeconds = $scope.timer.minute * 60 + $scope.timer.second + count;
                      $scope.second = parseSeconds(eventSeconds).seconds;
                      $scope.minute = parseSeconds(eventSeconds).minutes;
                   }
@@ -70,17 +73,19 @@
                /**
                 * Sets the default value for minute and second based on api data
                 */
-               if ($scope.timer.running === false) {
-                  $scope.minute = readableTime($scope.timer.minute);
-                  $scope.second = readableTime($scope.timer.second);
-               } else {
-                  getRealTime(timerService.seconds);
+               if ( $scope.timer ) {
+                  if ( $scope.timer.running === false ) {
+                     $scope.minute = readableTime($scope.timer.minute);
+                     $scope.second = readableTime($scope.timer.second);
+                  } else {
+                     getRealTime(timerService.seconds);
+                  }
                }
 
                /**
                 * Listener for timer update event, which sets the scope minute and second
                 */
-               $rootScope.$on('TIMER:UPDATE', function (e, count) {
+               $rootScope.$on('TIMER:UPDATE', function ( e, count ) {
                   getRealTime(count);
                });
             }]

@@ -18,7 +18,7 @@
 
    'use strict';
 
-   function appController ($scope, $widgetService, $apiService, $controller, timerService, $timeout) {
+   function appController ( $scope, $widgetService, $apiService, $controller, timerService, $timeout ) {
 
       // Extend the core controller that takes care of basic setup and common functions
       angular.extend(appController, $controller('widgetCoreController', {
@@ -36,7 +36,7 @@
       $scope.initialListLimit = $scope.defaultArgs.listLimit;
 
       // The live events grabbed from the api
-      $scope.liveEvents = [];
+      $scope.events = [];
 
       // An array of pages, used for pagination
       $scope.pages = [];
@@ -53,33 +53,35 @@
       // By default enable animation
       $scope.enableAnimation = true;
 
-      // Get page info
-      $widgetService.requestPageInfo();
-
       // Check that the list limit is not set to 0
-      if ($scope.initialListLimit === 0) {
+      if ( $scope.initialListLimit === 0 ) {
          $scope.initialListLimit = 3;
       }
 
       /**
        * Fetches the data from the API and sets up pages
        */
-      $scope.getLiveEvents = function (params) {
+      $scope.getLiveEvents = function ( params ) {
          // In case we want to indicate that we are loading data, set the loading flag
          $scope.loading = true;
 
          // Use filter to get events or get all live events.
-         if ($scope.args.useFilter) {
+         // TODO: Remove this implementation once live events can be filtered
+         if ( $scope.args.useFilter ) {
             $scope.apiService = $apiService.getLiveEventsByFilter;
          } else {
             $scope.apiService = $apiService.getLiveEvents;
          }
 
-         return $scope.apiService(params).then(function (response) {
-            $scope.liveEvents = response.data.liveEvents;
+         return $scope.apiService(params).then(function ( response ) {
+            if ( response.data.events != null ) {
+               $scope.events = response.data.events;
+            } else {
+               $scope.events = [];
+            }
 
             // Setup the pages
-            $scope.setPages($scope.liveEvents, $scope.args.listLimit); // Call the directive function here
+            $scope.setPages($scope.events, $scope.args.listLimit); // Call the directive function here
 
             // If there are outcomes in the betslip we need update our event outcomes with this.
             // Request the betslip outcomes.
@@ -94,18 +96,18 @@
                $scope.enableAnimation = true;
             }, 300);
 
-         }, function (response) {
+         }, function ( response ) {
             void 0;
             void 0;
          }).finally(function () {
 
             // Check if the list limit is higher than the actual length of the list, set it to the actual length if so
-            if ($scope.initialListLimit > $scope.liveEvents.length) {
-               $scope.args.listLimit = $scope.liveEvents.length;
+            if ( $scope.initialListLimit > $scope.events.length ) {
+               $scope.args.listLimit = $scope.events.length;
             }
 
             // Hide the widget if there are no live events to show
-            if ($scope.liveEvents && $scope.liveEvents.length > 0) {
+            if ( $scope.events && $scope.events.length > 0 ) {
                $widgetService.setWidgetHeight($scope.args.listLimit * 145 + 37 * 2);
             } else {
                $widgetService.setWidgetHeight(0);
@@ -116,8 +118,8 @@
          });
       };
 
-      $scope.toggleOutcome = function (outcome) {
-         if (outcome.selected !== true) {
+      $scope.toggleOutcome = function ( outcome ) {
+         if ( outcome.selected !== true ) {
             $scope.addOutcomeToBetslip(outcome);
          } else {
             $scope.removeOutcomeFromBetslip(outcome);
@@ -129,11 +131,11 @@
        * Iterate over the live events and update the offers with the data from the API
        * @param {Array} outcomes An array of outcomes that are in the betslip
        */
-      $scope.updateOutcomes = function (outcomes) {
-         var i = 0, eventLen = $scope.liveEvents.length;
-         for (; i < eventLen; ++i) {
-            if ($scope.liveEvents[i].mainBetOffer != null && $scope.liveEvents[i].mainBetOffer.outcomes != null) {
-               $scope.updateBetOfferOutcomes($scope.liveEvents[i].mainBetOffer, outcomes);
+      $scope.updateOutcomes = function ( outcomes ) {
+         var i = 0, eventLen = $scope.events.length;
+         for ( ; i < eventLen; ++i ) {
+            if ( $scope.events[i].betOffers[0] != null && $scope.events[i].betOffers[0].outcomes != null ) {
+               $scope.updateBetOfferOutcomes($scope.events[i].betOffers[0], outcomes);
             }
          }
          $scope.$apply();
@@ -144,7 +146,7 @@
       // so we can call our methods that require parameters from the widget settings after the init method is called
       $scope.init().then(function () {
          // Set filter parameters
-         if ($scope.pageInfo.pageType === 'filter') {
+         if ( $scope.pageInfo.pageType === 'filter' ) {
             $scope.params = $scope.pageInfo.pageParam;
          } else {
             $scope.params = $scope.args.fallBackFilter;
@@ -156,19 +158,19 @@
       // ------- Listeners ----------
 
       // Betslip outcomes listener
-      $scope.$on('OUTCOMES:UPDATE', function (event, data) {
+      $scope.$on('OUTCOMES:UPDATE', function ( event, data ) {
          $scope.updateOutcomes(data.outcomes);
       });
 
       // Odds format listener
-      $scope.$on('ODDS:FORMAT', function (event, data) {
+      $scope.$on('ODDS:FORMAT', function ( event, data ) {
          $scope.setOddsFormat(data);
       });
 
       // Listen to timer and refresh events every 30 sec
       // We disable the animation until after the events are loaded
-      $scope.$on('TIMER:UPDATE', function (e, count) {
-         if (count % 30 === 0) {
+      $scope.$on('TIMER:UPDATE', function ( e, count ) {
+         if ( count % 30 === 0 ) {
             $scope.enableAnimation = false;
             $scope.getLiveEvents($scope.params);
          }
@@ -176,7 +178,7 @@
 
    }
 
-   (function ($app) {
+   (function ( $app ) {
       return $app.controller('appController', ['$scope', 'kambiWidgetService', 'kambiAPIService', '$controller', 'timerService', '$timeout', appController]);
    })(angular.module('livenowWidget'));
 
@@ -199,7 +201,7 @@
     * @scope    *
     * @author teo@globalmouth.com
     */
-   (function ($app) {
+   (function ( $app ) {
       return $app.directive('timerDirective', [function () {
 
          return {
@@ -209,15 +211,19 @@
                'timer': '='
             },
             template: '<span ng-if="minute || second" ng-cloak>{{minute}} : {{second}}</span>',
-            controller: ['$scope', '$rootScope', 'timerService', function ($scope, $rootScope, timerService) {
+            controller: ['$scope', '$rootScope', 'timerService', function ( $scope, $rootScope, timerService ) {
 
                /**
                 * Prepends a zero for numbers below 10
                 * @param time
                 * @returns {*}
                 */
-               var readableTime = function (time) {
-                  if (time < 10) {
+               var readableTime = function ( time ) {
+                  if ( time < 0 ) {
+                     time = 0;
+                  }
+
+                  if ( time < 10 ) {
                      time = '0' + time;
                   }
                   return time;
@@ -228,7 +234,7 @@
                 * @param count
                 * @returns {{minutes, seconds}}
                 */
-               var parseSeconds = function (count) {
+               var parseSeconds = function ( count ) {
                   var input_count = parseInt(count, 10);
                   var minutes = Math.floor(input_count / 60);
                   var seconds = input_count - (minutes * 60);
@@ -242,10 +248,9 @@
                 * Get the current event minute and second based on event data and internal timer
                 * @param count
                 */
-               var getRealTime = function (count) {
-                  var eventSeconds = $scope.timer.minute * 60 + $scope.timer.second + count;
-
-                  if ($scope.timer.running) {
+               var getRealTime = function ( count ) {
+                  if ( $scope.timer && $scope.timer.running ) {
+                     var eventSeconds = $scope.timer.minute * 60 + $scope.timer.second + count;
                      $scope.second = parseSeconds(eventSeconds).seconds;
                      $scope.minute = parseSeconds(eventSeconds).minutes;
                   }
@@ -254,17 +259,19 @@
                /**
                 * Sets the default value for minute and second based on api data
                 */
-               if ($scope.timer.running === false) {
-                  $scope.minute = readableTime($scope.timer.minute);
-                  $scope.second = readableTime($scope.timer.second);
-               } else {
-                  getRealTime(timerService.seconds);
+               if ( $scope.timer ) {
+                  if ( $scope.timer.running === false ) {
+                     $scope.minute = readableTime($scope.timer.minute);
+                     $scope.second = readableTime($scope.timer.second);
+                  } else {
+                     getRealTime(timerService.seconds);
+                  }
                }
 
                /**
                 * Listener for timer update event, which sets the scope minute and second
                 */
-               $rootScope.$on('TIMER:UPDATE', function (e, count) {
+               $rootScope.$on('TIMER:UPDATE', function ( e, count ) {
                   getRealTime(count);
                });
             }]
