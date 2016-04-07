@@ -4,9 +4,9 @@
 
 .kw-page-link {
   cursor: pointer;
-  font-size: 10px;
+  padding: 5px 3px;
   min-width: 20px;
-  padding: 6px 3px;
+  font-size: 10px;
 }
 .kw-page-link.disabled {
   cursor: not-allowed;
@@ -17,7 +17,7 @@
 }
 
 .kw-pagination-arrow {
-  min-width: 37px;
+  min-width: 35px;
 }
 
 .animated {
@@ -82,17 +82,19 @@
   -webkit-transition-duration: 0s;
 }
 
+.ios .KambiWidget-outcome__label {
+  white-space: normal;
+}
+
 .kw-event {
   height: 145px;
   min-height: 145px;
 }
 
-.kw-event-time {
+.kw-event-time span {
   color: #999;
   font-size: 12px;
-  line-height: 1.4;
-}
-.kw-event-time span {
+  line-height: 2.4;
   white-space: nowrap;
 }
 

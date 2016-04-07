@@ -34,9 +34,9 @@
 
    <script src="https://c3-static.kambi.com/sb-mobileclient/widget-api/1.0.0.8/kambi-widget-api.js"></script>
 </head>
-<body class="kw-body">
+<body class="kw-body {{isIOS()}}" ng-controller="appController">
 <div class="KambiWidget-card-background-color KambiWidget-card-text-color l-flexbox l-vertical l-expander"
-     ng-controller="appController">
+     >
    <!--Header-->
    <header class="kw-header KambiWidget-header l-pl-16">{{'TITLE' | translate }} ({{events.length}})</header>
 
@@ -118,7 +118,7 @@
                </div>
 
                <!--Event time-->
-               <div class="kw-event-time l-pt-6">
+               <div class="kw-event-time">
                   <timer-directive class="l-flexbox l-pack-center" index="$index" timer="liveEvent.liveData.matchClock"
                                    ng-if="liveEvent.liveData.matchClock != null"></timer-directive>
                </div>

@@ -42,6 +42,16 @@
          $scope.initialListLimit = 3;
       }
 
+      var iOS = /iPhone/.test(navigator.userAgent) && !window.MSStream;
+
+      /**
+       * Checks if the device is iOS
+       * @returns {string}
+       */
+      $scope.isIOS = function() {
+         return iOS ? 'ios' : '';
+      };
+
       /**
        * Fetches the data from the API and sets up pages
        */

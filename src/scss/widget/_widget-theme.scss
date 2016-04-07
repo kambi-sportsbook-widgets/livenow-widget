@@ -4,11 +4,10 @@
 }
 
 .kw-event-time {
-   color: $color-4-2-card-supportive-text;
-   font-size: 12px;
-   line-height: 1.4;
-
    span {
+      color: $color-4-2-card-supportive-text;
+      font-size: 12px;
+      line-height: 2.4;
       white-space: nowrap;
    }
 }
