@@ -20,6 +20,10 @@
    }
 }
 
+.kw-event-path-name {
+   @include flex(0 1 auto);
+}
+
 .kw-event-team-home,
 .kw-event-team-away {
    font-size: 14px;
