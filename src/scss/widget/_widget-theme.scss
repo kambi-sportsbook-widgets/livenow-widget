@@ -13,10 +13,13 @@
 }
 
 .kw-event-path {
-   width: 1px;
-
-   .kw-path {
-      @include flex(0 1 auto);
+   div:not(:first-child):before {
+      content: "/";
+      margin-left: 6px;
+      margin-right: 6px;
+   }
+   div:last-child {
+      @include flexbox; // overrides display: inline-block rule in Kambi CSS
    }
 }
 
@@ -43,12 +46,8 @@
    min-height: 9px;
    min-width: 6px;
 
-   &.redCards {
+   &.red-cards {
       background-color: $color-red-card;
-   }
-
-   &.corners {
-      display: none;
    }
 }
 
