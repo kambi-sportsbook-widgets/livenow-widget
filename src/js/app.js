@@ -77,7 +77,10 @@
       },
 
       getLiveEvents (params) {
-         params = 'football/all/all/';
+         // For testing:
+         // params = 'football/all/all/';
+         // params = 'tennis/all/all';
+
          // Use filter to get events or get all live events.
          return CoreLibrary.offeringModule.getLiveEventsByFilter(params).then(( response ) => {
             clearTimeout(this.updateTimer);
