@@ -84,6 +84,10 @@
          // Use filter to get events or get all live events.
          return CoreLibrary.offeringModule.getLiveEventsByFilter(params).then(( response ) => {
             clearTimeout(this.updateTimer);
+            var previousPageNumber = null;
+            if (this.pagination != null) {
+               previousPageNumber = this.pagination.getCurrentPage();
+            }
             if ( response.events != null ) {
                response.events.forEach((e) => {
                   if (e.betOffers != null && e.betOffers.length >= 1) {
@@ -123,12 +127,18 @@
                CoreLibrary.widgetModule.setWidgetHeight(0);
             }
 
-            this.pagination = new CoreLibrary.PaginationComponent('#pagination', this.scope, 'events', this.scope.args.listLimit);
+            if (previousPageNumber == null) {
+               this.pagination = new CoreLibrary.PaginationComponent('#pagination', this.scope, 'events', this.scope.args.listLimit);
+            } else {
+               if (previousPageNumber >= this.scope.events.length) {
+                  previousPageNumber = this.scope.events.length - 1;
+               }
+               this.pagination.setCurrentPage(previousPageNumber);
+            }
 
             this.startTimer();
 
             this.updateTimer = setTimeout (() => {
-               // TODO prevent animation when updating and keep current page open
                this.getLiveEvents (params);
             }, 30000);
          }).catch((e) => {
