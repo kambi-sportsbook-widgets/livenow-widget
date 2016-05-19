@@ -35,7 +35,9 @@
 <body class="kw-body">
 <div class="KambiWidget-card-background-color KambiWidget-card-text-color l-flexbox l-vertical l-expander">
    <!--Header-->
-   <header class="kw-header KambiWidget-header l-pl-16">{'TITLE' | translate } ({eventsLength})</header>
+   <header class="kw-header KambiWidget-header l-pl-16">
+      {'Live' | translate }&nbsp;{'Right Now' | translate} ({eventsLength})
+   </header>
 
    <!--Main-->
    <main class="l-flexbox l-vertical l-flexed l-pack-start">
@@ -64,7 +66,7 @@
                <!--Scores-->
                <div class="kw-event-score l-flexbox l-vertical">
                   <!--Home set score-->
-                  <div rv-if="liveevent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-6">
+                  <div rv-if="liveevent.liveData.statistics | != null" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-6">
                      <div class="kw-event-team-stats red-cards"
                         rv-if="liveevent.liveData.statistics.footballStats.home.redCards | > 0">
                      </div>
@@ -80,7 +82,7 @@
                   </div>
 
                   <!--Away set score-->
-                  <div ng-if="liveevent.liveData.statistics" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-6">
+                  <div rv-if="liveevent.liveData.statistics | != null" class="l-flexbox l-pack-center l-align-center l-flexed l-mr-6">
                      <div class="kw-event-team-stats red-cards"
                         rv-if="liveevent.liveData.statistics.footballStats.away.redCards | > 0">
                      </div>
