@@ -4,7 +4,7 @@
    var LiveNowWidget = CoreLibrary.Component.subclass({
       defaultArgs: {
          listLimit: 1, // Set the list limit value to be used for pagination
-         fallBackFilter: 'all/all/all/' // Set a fallback filter if we cant get the filter from the url
+         fallBackFilter: 'all/all/all/' // Set a fallback filter if we can't get the filter from the url
       },
 
       constructor () {
@@ -15,10 +15,10 @@
          // The live events grabbed from the api
          this.scope.events = [];
 
-         // timer for updating the running times of the live matches
+         // Timer for updating the running times of the live matches
          this.timer = null;
 
-         // timer to update the matches themselves
+         // Timer to update the matches themselves
          this.updateTimer = null;
 
          // Set filter parameters
@@ -37,7 +37,7 @@
          this.updateTimers();
       },
 
-      // frequency of the timer update in milliseconds
+      // Frequency of the timer update in milliseconds
       timerTick: 1000,
 
       parseTime (secs, mins, running) {
@@ -71,7 +71,7 @@
          });
 
          clearTimeout(this.timer);
-         this.timer = setTimeout (() => {
+         this.timer = setTimeout(() => {
             this.updateTimers();
          }, this.timerTick);
       },
@@ -108,8 +108,8 @@
                   }
                });
                this.scope.events = response.events;
-               // rivets does not allow you to track an Array length
-               // see https://github.com/mikeric/rivets/issues/278
+               // Rivets does not allow you to track an array's length
+               // See https://github.com/mikeric/rivets/issues/278
                this.scope.eventsLength = response.events.length;
             } else {
                this.scope.events = [];
@@ -138,13 +138,13 @@
 
             this.startTimer();
 
-            this.updateTimer = setTimeout (() => {
-               this.getLiveEvents (params);
+            this.updateTimer = setTimeout(() => {
+               this.getLiveEvents(params);
             }, 30000);
          }).catch((e) => {
-            // the timer resets even if there is an error
-            this.updateTimer = setTimeout (() => {
-               this.getLiveEvents (params);
+            // The timer resets even if there is an error
+            this.updateTimer = setTimeout(() => {
+               this.getLiveEvents(params);
             }, 30000);
             throw e;
          });
