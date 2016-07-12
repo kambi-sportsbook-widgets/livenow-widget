@@ -30,6 +30,9 @@
          }
          // Fetch the live events
          this.getLiveEvents(params);
+
+         // Load a custom CSS
+         this.handleCustomCss();
       },
 
       startTimer () {
@@ -148,7 +151,28 @@
             }, 30000);
             throw e;
          });
+      },
+
+      handleCustomCss () {
+         this.customCssBaseUrl = ( this.scope.args.customCss ? this.scope.args.customCss : '' +
+            this.scope.args.cmsUrl + 'css/{customer}/' ) + 'style.css';
+         this.scope.customCssUrl = this.customCssBaseUrl
+            .replace(/\{customer}/, CoreLibrary.config.customer);
+
+         fetch(this.scope.customCssUrl)
+            .then(( response ) => {
+               if ( response.status >= 200 && response.status < 300 ) {
+                  this.scope.customCss = this.scope.customCssUrl;
+               } else {
+                  this.scope.customCss = 'custom/style.local.css';
+               }
+            })
+            .catch(( error ) => {
+               this.scope.customCss = 'custom/style.local.css';
+               console.debug('Unable to load custom css');
+            });
       }
+
    });
 
    var liveNowWidget = new LiveNowWidget({
