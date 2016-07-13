@@ -154,10 +154,9 @@
       },
 
       handleCustomCss () {
-         this.customCssBaseUrl = ( this.scope.args.customCss ? this.scope.args.customCss : '' +
-            this.scope.args.cmsUrl + 'css/{customer}/' ) + 'style.css';
-         this.scope.customCssUrl = this.customCssBaseUrl
-            .replace(/\{customer}/, CoreLibrary.config.customer);
+         this.dataUrl = ( this.scope.args.dataUrl ? this.scope.args.dataUrl + '{tournament}/css/{customer}/' : '' +
+            '//kambi-cdn.globalmouth.com/tournamentdata/{tournament}/css/{customer}/' ) + 'style.css';
+         this.scope.customCssUrl = this.dataUrl.replace(/\{customer}/, CoreLibrary.config.customer).replace(/\{tournament}/, this.scope.args.tournamentName);
 
          fetch(this.scope.customCssUrl)
             .then(( response ) => {
@@ -169,7 +168,7 @@
             })
             .catch(( error ) => {
                this.scope.customCss = 'custom/style.local.css';
-               console.debug('Unable to load custom css');
+               console.debug('Error fetching css');
             });
       }
 
