@@ -15,8 +15,14 @@
 .kw-event-path {
    div:not(:first-child):before {
       content: "/";
-      margin-left: 6px;
-      margin-right: 6px;
+      margin-left: 4px;
+      margin-right: 4px;
+   }
+   div:not(:first-child) {
+      // Text truncation on the rest of items
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
    }
    div:last-child {
       @include flexbox; // overrides display: inline-block rule in Kambi CSS
@@ -24,7 +30,7 @@
 }
 
 .kw-event-path-name {
-   @include flex(0 1 auto);
+   // @include flex(0 1 auto);
 }
 
 .kw-event-team-home,
