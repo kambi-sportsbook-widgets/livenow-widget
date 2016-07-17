@@ -73,3 +73,9 @@
    top: 50%;
    width: 6px;
 }
+
+.kw-event-outcomes {
+   outcome-component:first-child {
+      margin-left: 0;
+   }
+}
