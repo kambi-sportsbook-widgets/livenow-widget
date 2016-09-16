@@ -1,44 +1,24 @@
 # livenow-widget
 
-Live now widget displays a paginated list of live events with score and running time
+![](https://github.com/kambi-sportsbook-widgets/livenow-widget/blob/master/screenshot.png?raw=true)
 
-## Configuration example:
+Live now widget displays a paginated list of live events with score and running time. The widget is "context-aware" in the sense that if placed inside an area of the sportsbook (for example the World Cup Qualifiers page) it will show the events pertaining only that area (the World Cup Qualifiers matches).
 
-__`client-widgets.js`__
+This is a C-widget that means that it is not provided by Kambi directly, instead the operators that want to use this need to build and host the widget themselves. Please see Build Instructions.
 
+## Configuration
+
+Arguments and default values:
 ```json
-
-...
-{
-    "order": 1,
-    "widgetId": "Live right now widget",
-    "args": {
-        "listLimit": 3
-        "useFilter": false,
-        "fallBackFilter": "all/all/all/"
-    }
-},
-...
-
+"args": {
+    "listLimit": 1,
+    "fallBackFilter": "all/all/all/"
+}
 ```
 
-### The widget accepts the following parameter/s:
-1. `listLimit` - integer - defaults to 3 - list size per page
-2. `useFilter` - boolean - defaults to false - Whether to use a filter for getting the live events or fetch them all
-3. `fallBackFilter` - string - defaults to "all/all/all/" - A filter to use if we can't get filter from page.
+1. `listLimit` - integer - list size per page
+2. `fallBackFilter` - string - A filter to use if we can't get filter from page. That means this value is NOT used when `pageInfo.pageType` is `"filter"`, in this case the widget will use `pageInfo.pageParam` as the filter.
 
-# Other tools
+### Build Instructions
 
-For setting up sass maps, follow this tutorial https://www.hackmonkey.com/2014/sep/configuring-css-source-maps-compass
-
-To use Scss Lint, run "gem install scss_lint"
-
-# Build process
-
-1. Install node modules using "npm install"
-2. Edit the buildparameters.json file as needed. More details here https://github.com/kambi-sportsbook-widgets/widget-build-tools
-3. Run the default gulp task using the "gulp" command. 
-
-# Changelog
-
-changelog can be found [here](CHANGELOG.md)
+Please refer to the [core-library](https://github.com/kambi-sportsbook-widgets/widget-core-library)
